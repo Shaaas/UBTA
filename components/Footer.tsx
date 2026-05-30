@@ -32,7 +32,7 @@ export default function Footer() {
             <span className="block">Githurai 45</span>
             <span className="block">Ngara – Fig Tree</span>
             <span className="block">Njiru – Kangundo Rd</span>
-            <span className="block">Mlolongo – Mombasa Rd</span>
+          
           </div>
         </div>
 

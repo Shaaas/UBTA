@@ -1,1 +1,13 @@
-node_modules
+# Local env files
+.env
+.env.local
+.env.production
+.env.development
+.env.local.errors
+
+# Production builds
+.next/
+out/
+build/
+node_modules/
+.env*.local

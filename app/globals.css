@@ -1,0 +1,79 @@
+@import "tailwindcss";
+
+@theme {
+  --color-ubta-orange: #F37121;
+  --color-ubta-green: #00A651;
+  --color-ubta-blue: #2096D4;
+  --color-ubta-navy: #0B0F19;
+  --color-ubta-card: #111827;
+}
+
+:root {
+  --background: #0B0F19;
+  --foreground: #F8FAFC;
+}
+
+/* Hard reset default hyper-link styling behaviors */
+a {
+  text-decoration: none !important;
+  color: inherit;
+}
+
+body {
+  background-color: #0B0F19 !important;
+  color: #F8FAFC !important;
+  font-family: ui-sans-serif, system-ui, -apple-system, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Clean Custom Scrollbar for top navigation on small phones */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+@utility btn-primary {
+  display: inline-block;
+  text-align: center;
+  padding: 0.75rem 1.5rem;
+  border-radius: 0.5rem;
+  font-weight: 700;
+  background-color: #ffffff !important;
+  color: #000000 !important;
+  transition: all 0.2s ease-in-out;
+}
+
+@utility btn-accent {
+  display: inline-block;
+  text-align: center;
+  padding: 0.75rem 1.5rem;
+  border-radius: 0.5rem;
+  font-weight: 700;
+  background-color: #F37121 !important;
+  color: #ffffff !important;
+  transition: all 0.2s ease-in-out;
+  
+  &:hover {
+    background-color: #cc6624 !important;
+  }
+}
+
+@utility btn-outline {
+  display: inline-block;
+  text-align: center;
+  padding: 0.75rem 1.5rem;
+  border-radius: 0.5rem;
+  font-weight: 600;
+  border: 1px solid #374151 !important;
+  background-color: rgba(17, 24, 39, 0.4) !important;
+  color: #E5E7EB !important;
+  transition: all 0.2s ease-in-out;
+
+  &:hover {
+    border-color: #2096D4 !important;
+    background-color: rgba(17, 24, 39, 0.8) !important;
+  }
+}

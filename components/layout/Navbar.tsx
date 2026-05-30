@@ -37,14 +37,16 @@ export default function Navbar() {
 
         {/* Right Action Button Pillars */}
         <div className="flex items-center gap-3 min-w-fit">
-          <Link href="/auth/register" className="px-4 py-2 bg-[#00A651] text-white text-sm font-bold rounded-lg hover:bg-[#008c43] transition-colors whitespace-nowrap">
+          <Link href="/register" className="px-4 py-2 bg-[#00A651] text-white text-sm font-bold rounded-lg hover:bg-[#008c43] transition-colors whitespace-nowrap">
             Register
           </Link>
           <Link href="/auth/login" className="px-4 py-2 bg-transparent text-[#F37121] text-sm font-bold rounded-lg border border-[#F37121] hover:bg-[#F37121]/10 transition-all whitespace-nowrap">
             Member Login
           </Link>
         </div>
+        
 
+        
       </div>
     </nav>
   );
