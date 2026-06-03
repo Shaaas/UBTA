@@ -1,27 +1,19 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!.replace("/rest/v1/", ""),
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
-);
+// Force Next.js to treat this webhook endpoint as completely dynamic
+export const dynamic = 'force-dynamic';
 
-/**
- * POST /api/mpesa/callback
- *
- * Safaricom calls this URL after the user completes (or cancels) the STK push.
- * We update the matching transaction row with the real receipt number and full
- * callback JSON for audit purposes.
- *
- * This URL must be:
- *  - Publicly reachable (no localhost — use ngrok during dev)
- *  - Set as DARAJA_CALLBACK_URL in your .env
- *  - Whitelisted in your Daraja app's callback URL field
- */
 export async function POST(req: NextRequest) {
   try {
-    const raw = await req.json();
+    // Safely parse or fallback to placeholder URLs during compilation
+    const supabaseUrl = (process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://placeholder.supabase.co').replace("/rest/v1/", "");
+    const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || 'placeholder-key';
 
+    // Initialize inside the execution handler to block build-time env crashes
+    const supabase = createClient(supabaseUrl, supabaseServiceKey);
+
+    const raw = await req.json();
     const callback = raw?.Body?.stkCallback;
 
     if (!callback) {
@@ -47,7 +39,6 @@ export async function POST(req: NextRequest) {
         })
         .eq("mpesa_receipt_number", CheckoutRequestID);
 
-      // Always return 200 to Safaricom — they retry on non-200
       return NextResponse.json({ ResultCode: 0, ResultDesc: "Accepted" });
     }
 
@@ -71,7 +62,7 @@ export async function POST(req: NextRequest) {
         transaction_type:     "member_registration_paid",
         raw_callback_json:    raw,
       })
-      .eq("mpesa_receipt_number", CheckoutRequestID); // was stored as CheckoutRequestID initially
+      .eq("mpesa_receipt_number", CheckoutRequestID);
 
     if (error) {
       console.error("Supabase transaction update error:", error.message);
@@ -85,7 +76,6 @@ export async function POST(req: NextRequest) {
 
   } catch (err: unknown) {
     console.error("Callback handler error:", err);
-    // Still return 200 — Safaricom will retry on errors, causing duplicate processing
     return NextResponse.json({ ResultCode: 0, ResultDesc: "Accepted" });
   }
 }
