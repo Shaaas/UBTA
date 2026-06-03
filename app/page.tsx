@@ -2,13 +2,14 @@
 
 import React from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { UBTA_CONFIG } from '../config';
 
 export default function HomePage() {
   return (
     <div 
       className="bg-[#0B0F19] text-white min-h-[calc(100vh-73px)] flex flex-col relative bg-cover bg-right lg:bg-center bg-no-repeat bg-fixed"
-      style={{ backgroundImage: "url('/bike 1.jpg')" }}
+      style={{ backgroundImage: "url('/bike%201.jpg')" }}
     >
       
       {/* 
@@ -47,7 +48,7 @@ export default function HomePage() {
 
             {/* Core Description Text Body */}
             <p className="text-base sm:text-lg text-gray-300 leading-relaxed font-medium max-w-xl [text-shadow:_0_2px_4px_rgba(0,0,0,0.6)]">
-              UBTA empowers boda boda riders through structured leadership, member welfare, and financial growth via CBD SACCO — Kenya’s most trusted riders’ co-operative.
+              UBTA empowers boda boda riders through structured leadership, member welfare, and financial growth via CBD SACCO — Kenya&apos;s most trusted riders&apos; co-operative.
             </p>
 
             {/* Layout Primary Button Actions Container */}
@@ -117,12 +118,12 @@ export default function HomePage() {
               {/* Card 1: Motorbike QR Code */}
               <div className="p-5 bg-[#0B0F19]/90 border border-gray-800 rounded-xl backdrop-blur-sm flex flex-col justify-between group">
                 <div>
-                  {/* Scaled-up asset image container */}
                   <div className="relative w-full h-48 bg-black/40 rounded-lg mb-4 overflow-hidden border border-gray-800/60 flex items-center justify-center p-3">
-                    <img 
+                    <Image 
                       src="/qrcode.png" 
                       alt="Motorbike QR Code" 
-                      className="max-w-full max-h-full object-contain opacity-75 group-hover:opacity-100 transition-all duration-300 transform group-hover:scale-[1.02]"
+                      fill
+                      className="object-contain opacity-75 group-hover:opacity-100 transition-all duration-300 transform group-hover:scale-[1.02]"
                     />
                   </div>
                   <span className="text-xs font-bold text-gray-500 block uppercase">Motorbike QR Code</span>
@@ -134,12 +135,12 @@ export default function HomePage() {
               {/* Card 2: Official Member Card */}
               <div className="p-5 bg-[#0B0F19]/90 border border-gray-800 rounded-xl backdrop-blur-sm flex flex-col justify-between group">
                 <div>
-                  {/* Scaled-up asset image container */}
                   <div className="relative w-full h-48 bg-black/40 rounded-lg mb-4 overflow-hidden border border-gray-800/60 flex items-center justify-center p-3">
-                    <img 
-                      src="/member card.png" 
+                    <Image 
+                      src="/member%20card.png" 
                       alt="Official Member Card" 
-                      className="max-w-full max-h-full object-contain opacity-75 group-hover:opacity-100 transition-all duration-300 transform group-hover:scale-[1.02]"
+                      fill
+                      className="object-contain opacity-75 group-hover:opacity-100 transition-all duration-300 transform group-hover:scale-[1.02]"
                     />
                   </div>
                   <span className="text-xs font-bold text-gray-500 block uppercase">Official Member Card</span>
@@ -151,12 +152,12 @@ export default function HomePage() {
               {/* Card 3: UBTA Reflector Jacket */}
               <div className="p-5 bg-[#0B0F19]/90 border border-gray-800 rounded-xl backdrop-blur-sm flex flex-col justify-between group">
                 <div>
-                  {/* Scaled-up asset image container */}
                   <div className="relative w-full h-48 bg-black/40 rounded-lg mb-4 overflow-hidden border border-gray-800/60 flex items-center justify-center p-3">
-                    <img 
+                    <Image 
                       src="/reflectorjacket.png" 
                       alt="UBTA Reflector Jacket" 
-                      className="max-w-full max-h-full object-contain opacity-75 group-hover:opacity-100 transition-all duration-300 transform group-hover:scale-[1.02]"
+                      fill
+                      className="object-contain opacity-75 group-hover:opacity-100 transition-all duration-300 transform group-hover:scale-[1.02]"
                     />
                   </div>
                   <span className="text-xs font-bold text-gray-500 block uppercase">UBTA Reflector Jacket</span>
