@@ -1,7 +1,6 @@
 import { createClient } from '@supabase/supabase-js';
 import { NextResponse } from 'next/server';
 
-// Forces Next.js to treat this API route as purely dynamic, bypassing static compilation checks
 export const dynamic = 'force-dynamic';
 
 // =========================================================================
@@ -42,23 +41,13 @@ export async function GET() {
   const report = { successful: 0, failed: 0, errors: [] as string[] };
 
   for (const rider of ridersToImport) {
-    // ... the rest of your loop remains identical
-
-  const report = { successful: 0, failed: 0, errors: [] as string[] };
-
-  const report = { successful: 0, failed: 0, errors: [] as string[] };
-
-  for (const rider of ridersToImport) {
     try {
-      // 1. Fallback for riders missing emails
       const cleanEmail = rider.email_address && rider.email_address.includes('@')
         ? rider.email_address.trim().toLowerCase()
         : `rider.${rider.id_number || Math.floor(Math.random() * 1000000)}@ubta.co.ke`;
 
-      // 2. Generate a temporary placeholder password based on their National ID
       const tempPassword = `Ubta!${rider.id_number || 'Secure2026'}`;
 
-      // 3. Provision the authentication account profile shell
       const { data: authUser, error: authError } = await supabaseAdmin.auth.admin.createUser({
         email: cleanEmail,
         password: tempPassword,
@@ -70,7 +59,6 @@ export async function GET() {
         throw new Error(`Auth account creation skipped for ${rider.full_name}: ${authError?.message}`);
       }
 
-      // 4. Link the authentication identity directly to their public metadata profile row
       const { error: profileError } = await supabaseAdmin
         .from('profiles')
         .insert({
@@ -94,12 +82,13 @@ export async function GET() {
         await supabaseAdmin.auth.admin.deleteUser(authUser.user.id);
         throw new Error(`Profile insertion failed for ${rider.full_name}: ${profileError.message}`);
       }
-report.successful++;
+
+      report.successful++;
     } catch (err: any) {
       report.failed++;
       report.errors.push(err.message || err);
     }
-  } // <-- Closes the for loop
+  }
 
   return NextResponse.json({ message: "Database seeding sequence completed", report });
-} // <-- Closes the GET function
+}
