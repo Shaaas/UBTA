@@ -25,7 +25,6 @@ const ridersToImport: any[] = [
 ];
 
 export async function GET() {
-  // Provide dummy fallback strings so the strict build compiler doesn't crash when env keys are absent
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://placeholder-url.supabase.co';
   const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || 'placeholder-key';
 
@@ -39,6 +38,11 @@ export async function GET() {
       },
     }
   );
+
+  const report = { successful: 0, failed: 0, errors: [] as string[] };
+
+  for (const rider of ridersToImport) {
+    // ... the rest of your loop remains identical
 
   const report = { successful: 0, failed: 0, errors: [] as string[] };
 
