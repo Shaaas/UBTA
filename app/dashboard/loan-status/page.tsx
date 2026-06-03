@@ -4,6 +4,7 @@ import React, { useEffect, useState } from 'react';
 import { createBrowserClient } from '@supabase/ssr';
 import { useRouter } from 'next/navigation';
 import { AlertCircle, CheckCircle2, DollarSign, FileText, Scale } from 'lucide-react';
+export const dynamic = 'force-dynamic';
 
 interface RiderProfile {
   id: string;
