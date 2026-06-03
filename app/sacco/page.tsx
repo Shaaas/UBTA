@@ -96,7 +96,7 @@ const agents = [
   { name: "Githurai 45",          desc: "Serve northern Nairobi zones" },
   { name: "Ngara – Fig Tree",     desc: "Central Nairobi agent" },
   { name: "Njiru – Kangundo Road",desc: "Eastern Nairobi zones" },
-  { name: "Mlolongo – Mombasa Road", desc: "South-eastern corridor" },
+
 ];
 
 export default function SaccoPage() {
@@ -325,65 +325,89 @@ export default function SaccoPage() {
             ))}
           </div>
         </div>
-      </section>
+        </section>
 
-      {/* ── MEMBER ITEMS ─────────────────────────────────────── */}
-      <section className="py-16 bg-[#0B0F19] border-t border-gray-900">
+{/* ── MEMBER ITEMS ─────────────────────────────────────── */}
+      <section className="py-20 lg:py-24 bg-[#0B0F19] block border-t border-gray-800/40">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-12">
-            <p className="text-teal-400 text-xs font-bold uppercase tracking-widest mb-3">
+          
+          <div className="text-center mb-16">
+            <p className="text-[#F37121] text-xs font-black uppercase tracking-widest mb-3">
               Official member items
             </p>
-            <h2 className="text-2xl sm:text-3xl font-black text-white uppercase tracking-tight">
+            <h2 className="text-white font-black text-3xl uppercase tracking-tight">
               Get your UBTA gear
             </h2>
-            <p className="text-gray-400 text-xs sm:text-sm mt-2 max-w-md mx-auto">
+            <p className="text-gray-400 text-xs sm:text-sm mt-3 max-w-md mx-auto font-medium">
               All payable via M-Pesa Paybill. Account Name format: specify reason for payment.
             </p>
           </div>
-          <div className="grid sm:grid-cols-3 gap-4 sm:gap-6 max-w-4xl mx-auto">
+
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 max-w-5xl mx-auto w-full">
             {[
               {
-                name:  "Motorbike QR Code",
+                name: "Motorbike QR Code",
                 price: "Ksh 500",
-                desc:  "Official UBTA QR code for your motorbike — verifiable identification.",
+                desc: "Official UBTA QR code for your motorbike — verifiable identification.",
+                imageSrc: "/qrcode.png",
                 border: "border-orange-500/20 bg-orange-500/5 text-orange-400",
               },
               {
-                name:  "Member Card",
+                name: "Member Card",
                 price: "Ksh 300",
-                desc:  "Your official UBTA member card with your name and member number.",
+                desc: "Your official UBTA member card with your name and member number.",
+                imageSrc: "/member card.png",
                 border: "border-emerald-500/20 bg-emerald-500/5 text-emerald-400",
               },
               {
-                name:  "Reflector Jacket",
+                name: "Reflector Jacket",
                 price: "From Ksh 500",
-                desc:  "UBTA branded hi-vis reflector jacket. Available in 3 sizes — Ksh 500, 700, 1,000.",
+                desc: "UBTA branded hi-vis reflector jacket. Available in 3 sizes — Ksh 500, 700, 1,000.",
+                imageSrc: "/reflectorjacket.png",
                 border: "border-amber-500/20 bg-amber-500/5 text-amber-400",
               },
             ].map((item) => (
               <div
                 key={item.name}
-                className={`bg-[#111827] rounded-2xl border p-6 text-center ${item.border.split(' ')[0]}`}
+                className="relative group bg-[#111827]/40 rounded-2xl border border-gray-800/80 p-6 flex flex-col justify-between min-h-[340px] overflow-hidden shadow-2xl backdrop-blur-md"
               >
-                <span className={`inline-block text-[10px] font-extrabold tracking-wider uppercase px-3 py-1 rounded-md mb-4 ${item.border.split(' ')[1]} ${item.border.split(' ')[2]}`}>
-                  {item.price}
-                </span>
-                <h3 className="font-bold text-white text-base uppercase tracking-tight mb-2">
-                  {item.name}
-                </h3>
-                <p className="text-gray-400 text-xs sm:text-sm leading-relaxed">{item.desc}</p>
+                {/* Product Image Layer */}
+                <div 
+                  className="absolute inset-0 bg-cover bg-center opacity-20 group-hover:opacity-40 transition-opacity duration-300 mix-blend-luminosity pointer-events-none z-0"
+                  style={{ backgroundImage: `url('${item.imageSrc}')` }}
+                />
+                
+                {/* Dark Vignette Mask for Text Contrast */}
+                <div className="absolute inset-0 bg-gradient-to-t from-[#0B0F19] via-[#0B0F19]/80 to-transparent pointer-events-none z-10" />
+
+                {/* Top Row: Price Badge */}
+                <div className="relative z-20 self-start">
+                  <span className={`inline-block text-[10px] font-extrabold tracking-wider uppercase px-3 py-1.5 rounded-xl backdrop-blur-sm ${item.border.split(' ')[1]} ${item.border.split(' ')[2]}`}>
+                    {item.price}
+                  </span>
+                </div>
+
+                {/* Bottom Row: Text content */}
+                <div className="relative z-20 mt-auto pt-12 text-left">
+                  <h3 className="font-black text-white text-base uppercase tracking-wide mb-2 [text-shadow:_0_1px_3px_rgba(0,0,0,0.8)]">
+                    {item.name}
+                  </h3>
+                  <p className="text-gray-400 text-xs sm:text-sm leading-relaxed">
+                    {item.desc}
+                  </p>
+                </div>
               </div>
             ))}
           </div>
 
           {/* Payment note */}
-          <div className="mt-10 max-w-xl mx-auto bg-[#111827] border border-gray-800 rounded-2xl p-6 text-center">
+          <div className="mt-12 max-w-xl mx-auto bg-[#111827]/60 border border-gray-800 rounded-2xl p-6 text-center backdrop-blur-sm relative overflow-hidden">
+            <div className="absolute top-0 right-0 w-24 h-24 bg-orange-500/5 rounded-full blur-xl pointer-events-none" />
             <p className="text-gray-500 text-[10px] font-bold uppercase tracking-widest mb-1">Pay via M-Pesa</p>
             <div className="font-black text-orange-400 text-2xl mb-1 tracking-tight">
               Paybill: Coming soon
             </div>
-            <p className="text-gray-400 text-[11px] leading-normal max-w-sm mx-auto">
+            <p className="text-gray-400 text-[11px] leading-normal max-w-sm mx-auto font-medium">
               Account No: use the reason for payment (e.g. "Registration", "Monthly", "QRCode")
             </p>
             <div className="mt-4 inline-flex items-center gap-2 bg-amber-500/5 border border-amber-500/20 px-4 py-2 rounded-xl text-amber-400 text-xs font-semibold">
@@ -391,6 +415,7 @@ export default function SaccoPage() {
               Paybill number will be updated once active
             </div>
           </div>
+
         </div>
       </section>
 
