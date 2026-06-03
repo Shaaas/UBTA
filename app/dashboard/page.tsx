@@ -4,15 +4,17 @@ import React, { useEffect, useState } from 'react';
 import { createBrowserClient } from '@supabase/ssr';
 import { useRouter } from 'next/navigation';
 
+// Safe build-time evaluation guards
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://placeholder.supabase.co';
+const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'placeholder-key';
+
+// Initialize ONCE outside the component scope
+const supabase = createBrowserClient(supabaseUrl, supabaseAnonKey);
+
 export default function DashboardPage() {
   const router = useRouter();
   const [loading, setLoading] = useState(true);
   const [riderData, setRiderData] = useState<any>(null);
-
-  const supabase = createBrowserClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-  );
 
   useEffect(() => {
     const fetchRiderProfile = async () => {
@@ -26,7 +28,7 @@ export default function DashboardPage() {
       setLoading(false);
     };
     fetchRiderProfile();
-  }, [router, supabase]);
+  }, [router]);
 
   if (loading) return <div className="text-slate-400">Loading Dashboard...</div>;
 
