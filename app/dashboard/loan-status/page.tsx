@@ -8,7 +8,6 @@ import { AlertCircle, CheckCircle2, DollarSign, FileText, Scale } from 'lucide-r
 export const dynamic = 'force-dynamic';
 export const fetchCache = 'force-no-store';
 export const revalidate = 0;
-export const dynamic = 'force-dynamic';
 
 interface RiderProfile {
   id: string;
