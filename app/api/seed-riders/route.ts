@@ -25,10 +25,13 @@ const ridersToImport: any[] = [
 ];
 
 export async function GET() {
-  // Initialize inside the handler to prevent Vercel from crashing due to missing build-time env keys
+  // Provide dummy fallback strings so the strict build compiler doesn't crash when env keys are absent
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://placeholder-url.supabase.co';
+  const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || 'placeholder-key';
+
   const supabaseAdmin = createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!, 
+    supabaseUrl,
+    supabaseServiceKey, 
     {
       auth: {
         autoRefreshToken: false,
@@ -36,6 +39,8 @@ export async function GET() {
       },
     }
   );
+
+  const report = { successful: 0, failed: 0, errors: [] as string[] };
 
   const report = { successful: 0, failed: 0, errors: [] as string[] };
 
