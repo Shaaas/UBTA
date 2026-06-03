@@ -4,7 +4,10 @@ import React, { useEffect, useState } from 'react';
 import { createBrowserClient } from '@supabase/ssr';
 import { useRouter } from 'next/navigation';
 import { AlertCircle, CheckCircle2, DollarSign, FileText, Scale } from 'lucide-react';
-
+// Add this configuration object
+export const dynamic = 'force-dynamic';
+export const fetchCache = 'force-no-store';
+export const revalidate = 0;
 export const dynamic = 'force-dynamic';
 
 interface RiderProfile {
