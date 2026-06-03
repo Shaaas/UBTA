@@ -3,7 +3,7 @@
 import React, { useEffect, useState } from 'react';
 import { createBrowserClient } from '@supabase/ssr';
 import { useRouter } from 'next/navigation';
-import { AlertCircle, CheckCircle2, DollarSign, FileText, HelpCircle, Scale } from 'lucide-react';
+import { AlertCircle, CheckCircle2, DollarSign, FileText, Scale } from 'lucide-react';
 
 interface RiderProfile {
   id: string;
@@ -72,65 +72,65 @@ export default function LoanStatusPage() {
         .maybeSingle();
 
       setExistingLoan(loanRecord);
-      Loading(false);
+      setLoading(false);
     };
 
-    FetchLoanMetrics();
+    fetchLoanMetrics();
   }, [router]);
 
-  Const rawSaccoBalance = Number(riderProfile?.sacco_balance || 0);
-  Const maxEligibleLoan = rawSaccoBalance * 3;
+  const rawSaccoBalance = Number(riderProfile?.sacco_balance || 0);
+  const maxEligibleLoan = rawSaccoBalance * 3;
   
   // Custom SACCO Interest Formulation: Fixed 1% reducing balance per month
-  Const estimatedInterest = requestedAmount * (0.01 * repaymentMonths);
-  Const totalRepayment = requestedAmount + estimatedInterest;
-  Const monthlyInstallment = repaymentMonths > 0 ? TotalRepayment / repaymentMonths : 0;
+  const estimatedInterest = requestedAmount * (0.01 * repaymentMonths);
+  const totalRepayment = requestedAmount + estimatedInterest;
+  const monthlyInstallment = repaymentMonths > 0 ? totalRepayment / repaymentMonths : 0;
 
-  Const handleLoanApplication = async (e: React.FormEvent) => {
-    E.preventDefault();
-    If (requestedAmount <= 0 || requestedAmount > maxEligibleLoan) {
-      SetError(`Invalid amount. Your maximum allocation capacity is Ksh ${maxEligibleLoan.toLocaleString()}.`);
-      Return;
+  const handleLoanApplication = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (requestedAmount <= 0 || requestedAmount > maxEligibleLoan) {
+      setError(`Invalid amount. Your maximum allocation capacity is Ksh ${maxEligibleLoan.toLocaleString()}.`);
+      return;
     }
-    If (!guarantorPhone) {
-      SetError('An active peer guarantor mobile contact node is required.');
-      Return;
+    if (!guarantorPhone) {
+      setError('An active peer guarantor mobile contact node is required.');
+      return;
     }
 
-    SetError(null);
-    SetSubmitting(true);
+    setError(null);
+    setSubmitting(true);
 
-    Const { data: { user } } = await supabase.auth.getUser();
+    const { data: { user } } = await supabase.auth.getUser();
 
-    Const { error: insertError } = await supabase
+    const { error: insertError } = await supabase
       .from('loans')
       .insert({
-        User_id: user?.id,
-        Amount: requestedAmount,
-        Term_months: repaymentMonths,
-        Guarantor_contact: guarantorPhone,
-        Monthly_repayment: monthlyInstallment,
-        Status: 'pending'
+        user_id: user?.id,
+        amount: requestedAmount,
+        term_months: repaymentMonths,
+        guarantor_contact: guarantorPhone,
+        monthly_repayment: monthlyInstallment,
+        status: 'pending'
       });
 
-    SetSubmitting(false);
-    If (insertError) {
-      SetError(insertError.message);
+    setSubmitting(false);
+    if (insertError) {
+      setError(insertError.message);
     } else {
-      SetSuccess(true);
-      SetExistingLoan({
-        Amount: requestedAmount,
-        Term_months: repaymentMonths,
-        Monthly_repayment: monthlyInstallment,
-        Status: 'pending',
-        Created_at: new Date().toISOString()
+      setSuccess(true);
+      setExistingLoan({
+        amount: requestedAmount,
+        term_months: repaymentMonths,
+        monthly_repayment: monthlyInstallment,
+        status: 'pending',
+        created_at: new Date().toISOString()
       });
     }
   };
 
-  If (loading) return <div className="text-slate-400 p-8">Loading Financial Metrics...</div>;
+  if (loading) return <div className="text-slate-400 p-8">Loading Financial Metrics...</div>;
 
-  Return (
+  return (
     <div className="max-w-6xl mx-auto block w-full space-y-8 p-4 sm:p-6">
       
       {/* View Header Meta Title */}
@@ -186,13 +186,13 @@ export default function LoanStatusPage() {
                   <span className="text-white font-bold">Ksh {requestedAmount.toLocaleString()}</span>
                 </div>
                 <input
-                  Type="range"
-                  Min={1000}
-                  Max={maxEligibleLoan}
-                  Step={500}
-                  Value={requestedAmount}
-                  OnChange={(e) => setRequestedAmount(Number(e.target.value))}
-                  ClassName="w-full h-2 bg-[#13141a] rounded-lg appearance-none cursor-pointer accent-[#F37121]"
+                  type="range"
+                  min={1000}
+                  max={maxEligibleLoan}
+                  step={500}
+                  value={requestedAmount}
+                  onChange={(e) => setRequestedAmount(Number(e.target.value))}
+                  className="w-full h-2 bg-[#13141a] rounded-lg appearance-none cursor-pointer accent-[#F37121]"
                 />
                 <div className="flex justify-between text-[10px] text-slate-500 font-medium mt-1">
                   <span>Min: Ksh 1,000</span>
@@ -206,9 +206,9 @@ export default function LoanStatusPage() {
                   Amortization Duration Framework
                 </label>
                 <select
-                  Value={repaymentMonths}
-                  OnChange={(e) => setRepaymentMonths(Number(e.target.value))}
-                  ClassName="w-full bg-[#13141a] border border-white/[0.04] rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-[#F37121]/50"
+                  value={repaymentMonths}
+                  onChange={(e) => setRepaymentMonths(Number(e.target.value))}
+                  className="w-full bg-[#13141a] border border-white/[0.04] rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-[#F37121]/50"
                 >
                   <option value={3}>3 Months (Short Term Float)</option>
                   <option value={6}>6 Months (Standard Turnaround)</option>
@@ -223,12 +223,12 @@ export default function LoanStatusPage() {
                   UBTA Registered Peer Guarantor Phone <span className="text-[#F37121]">*</span>
                 </label>
                 <input
-                  Type="tel"
-                  Placeholder="e.g. 0722000000"
-                  Value={guarantorPhone}
-                  OnChange={(e) => setGuarantorPhone(e.target.value)}
-                  Required
-                  ClassName="w-full bg-[#13141a] border border-white/[0.04] rounded-xl px-4 py-3 text-sm text-white placeholder:text-slate-700 focus:outline-none focus:border-[#F37121]/50"
+                  type="tel"
+                  placeholder="e.g. 0722000000"
+                  value={guarantorPhone}
+                  onChange={(e) => setGuarantorPhone(e.target.value)}
+                  required
+                  className="w-full bg-[#13141a] border border-white/[0.04] rounded-xl px-4 py-3 text-sm text-white placeholder:text-slate-700 focus:outline-none focus:border-[#F37121]/50"
                 />
               </div>
 
@@ -240,9 +240,9 @@ export default function LoanStatusPage() {
               )}
 
               <button
-                Type="submit"
-                Disabled={submitting}
-                ClassName="w-full bg-[#F37121] hover:bg-[#d65d14] disabled:opacity-50 text-white text-xs font-bold py-2.5 rounded-lg transition-colors"
+                type="submit"
+                disabled={submitting}
+                className="w-full bg-[#F37121] hover:bg-[#d65d14] disabled:opacity-50 text-white text-xs font-bold py-2.5 rounded-lg transition-colors"
               >
                 {submitting ? "Submitting Request..." : "Apply for Loan"}
               </button>
