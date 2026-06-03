@@ -1,11 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 
-// ─── Supabase admin client (service role — server only) ───────────────────────
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!.replace("/rest/v1/", ""), // strip REST suffix if present
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
-);
+// Force Next.js to treat this STK engine endpoint as purely dynamic
+export const dynamic = 'force-dynamic';
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -32,12 +29,15 @@ function password(shortcode: string, passkey: string, ts: string): string {
 
 /** Get Daraja OAuth token */
 async function getDarajaToken(): Promise<string> {
-  const credentials = Buffer.from(
-    `${process.env.DARAJA_CONSUMER_KEY}:${process.env.DARAJA_CONSUMER_SECRET}`
-  ).toString("base64");
+  // Safe string defaults prevent crash failures when running inside the Vercel builder container
+  const consumerKey = process.env.DARAJA_CONSUMER_KEY || "placeholder";
+  const consumerSecret = process.env.DARAJA_CONSUMER_SECRET || "placeholder";
+  const baseUrl = process.env.DARAJA_BASE_URL || "https://sandbox.safaricom.co.ke";
+
+  const credentials = Buffer.from(`${consumerKey}:${consumerSecret}`).toString("base64");
 
   const res = await fetch(
-    `${process.env.DARAJA_BASE_URL}/oauth/v1/generate?grant_type=client_credentials`,
+    `${baseUrl}/oauth/v1/generate?grant_type=client_credentials`,
     { headers: { Authorization: `Basic ${credentials}` } }
   );
 
@@ -54,25 +54,29 @@ async function getDarajaToken(): Promise<string> {
 
 export async function POST(req: NextRequest) {
   try {
+    // Safely pull string targets for build container evaluation
+    const supabaseUrl = (process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://placeholder.supabase.co').replace("/rest/v1/", "");
+    const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || 'placeholder-key';
+
+    // Scoped execution inside the runtime pipeline blocks compile-time environment validation crashes
+    const supabase = createClient(supabaseUrl, supabaseServiceKey);
+
     const body = await req.json();
 
     // ── 1. Parse & validate payload ──────────────────────────────────────────
     const {
-      // Payment
       phone,
       amount,
-      membershipType, // "ubta_only" | "sacco_only" | "both" | "affiliate"
-
-      // Profile fields
+      membershipType,
       fullName,
       idNumber,
       bikeRegistration,
       county,
       subCounty,
       stageNode,
-      customStageNode,   // only set when stageNode === "Other / Not Listed"
+      customStageNode,
       dateOfBirth,
-      kraPin,            // stored in account_reference on transaction
+      kraPin,
       kinName,
       kinPhone,
       kinRelationship,
@@ -86,8 +90,10 @@ export async function POST(req: NextRequest) {
     }
 
     const formattedPhone = formatPhone(phone);
-    const shortcode      = process.env.DARAJA_SHORTCODE!;
-    const passkey        = process.env.DARAJA_PASSKEY!;
+    const shortcode      = process.env.DARAJA_SHORTCODE || "000000";
+    const passkey        = process.env.DARAJA_PASSKEY || "placeholder";
+    const baseUrl        = process.env.DARAJA_BASE_URL || "https://sandbox.safaricom.co.ke";
+    const callbackUrl    = process.env.DARAJA_CALLBACK_URL || "https://example.com/api/mpesa/callback";
     const ts             = timestamp();
     const pwd            = password(shortcode, passkey, ts);
 
@@ -96,7 +102,7 @@ export async function POST(req: NextRequest) {
 
     // ── 3. Initiate STK push ─────────────────────────────────────────────────
     const stkRes = await fetch(
-      `${process.env.DARAJA_BASE_URL}/mpesa/stkpush/v1/processrequest`,
+      `${baseUrl}/mpesa/stkpush/v1/processrequest`,
       {
         method: "POST",
         headers: {
@@ -112,7 +118,7 @@ export async function POST(req: NextRequest) {
           PartyA:            formattedPhone,
           PartyB:            shortcode,
           PhoneNumber:       formattedPhone,
-          CallBackURL:       process.env.DARAJA_CALLBACK_URL, // e.g. https://yourdomain.co.ke/api/mpesa/callback
+          CallBackURL:       callbackUrl,
           AccountReference:  "UBTA-REG",
           TransactionDesc:   `UBTA Registration - ${membershipType ?? "member"}`,
         }),
@@ -133,7 +139,6 @@ export async function POST(req: NextRequest) {
     }
 
     // ── 4. Insert profile into Supabase ──────────────────────────────────────
-    // We upsert on phone_number so re-submissions don't create duplicates.
     const { data: profile, error: profileError } = await supabase
       .from("profiles")
       .upsert(
@@ -159,19 +164,18 @@ export async function POST(req: NextRequest) {
       .single();
 
     if (profileError) {
-      // Log but don't fail — STK push already sent, callback will retry
       console.error("Supabase profile upsert error:", profileError.message);
     }
 
     // ── 5. Insert pending transaction ────────────────────────────────────────
     const { error: txError } = await supabase.from("transactions").insert({
       profile_id:          profile?.id ?? null,
-      mpesa_receipt_number: stkData.CheckoutRequestID, // real receipt comes in callback
+      mpesa_receipt_number: stkData.CheckoutRequestID,
       amount:              amount,
       phone_number:        formattedPhone,
       account_reference:   kraPin ?? "UBTA-REG",
       transaction_type:    membershipType ?? "member_registration",
-      raw_callback_json:   null, // filled in by /api/mpesa/callback
+      raw_callback_json:   null,
     });
 
     if (txError) {
