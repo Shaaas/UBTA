@@ -94,13 +94,12 @@ export async function GET() {
         await supabaseAdmin.auth.admin.deleteUser(authUser.user.id);
         throw new Error(`Profile insertion failed for ${rider.full_name}: ${profileError.message}`);
       }
-
-      report.successful++;
+report.successful++;
     } catch (err: any) {
       report.failed++;
       report.errors.push(err.message || err);
     }
-  }
+  } // <-- Closes the for loop
 
   return NextResponse.json({ message: "Database seeding sequence completed", report });
-}
+} // <-- Closes the GET function
