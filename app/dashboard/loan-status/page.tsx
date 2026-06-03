@@ -5,6 +5,20 @@ import { createBrowserClient } from '@supabase/ssr';
 import { useRouter } from 'next/navigation';
 import { AlertCircle, CheckCircle2, DollarSign, FileText, HelpCircle, Scale } from 'lucide-react';
 
+interface RiderProfile {
+  id: string;
+  sacco_balance?: number;
+  [key: string]: any;
+}
+
+interface LoanRecord {
+  amount: number;
+  term_months: number;
+  monthly_repayment: number;
+  status: 'pending' | 'approved' | 'active' | 'rejected';
+  created_at: string;
+}
+
 export default function LoanStatusPage() {
   const router = useRouter();
   const [loading, setLoading] = useState(true);
@@ -13,8 +27,8 @@ export default function LoanStatusPage() {
   const [error, setError] = useState<string | null>(null);
   
   // Account Metrics State
-  const [riderProfile, setRiderProfile] = useState<any>(null);
-  const [existingLoan, setExistingLoan] = useState<any>(null);
+  const [riderProfile, setRiderProfile] = useState<RiderProfile | null>(null);
+  const [existingLoan, setExistingLoan] = useState<LoanRecord | null>(null);
 
   // Form Interactive Calculator State
   const [requestedAmount, setRequestedAmount] = useState<number>(0);
@@ -70,7 +84,7 @@ export default function LoanStatusPage() {
   // Custom SACCO Interest Formulation: Fixed 1% reducing balance per month
   const estimatedInterest = requestedAmount * (0.01 * repaymentMonths);
   const totalRepayment = requestedAmount + estimatedInterest;
-  const monthlyInstallment = totalRepayment / repaymentMonths;
+  const monthlyInstallment = repaymentMonths > 0 ? totalRepayment / repaymentMonths : 0;
 
   const handleLoanApplication = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -117,7 +131,7 @@ export default function LoanStatusPage() {
   if (loading) return <div className="text-slate-400 p-8">Loading Financial Metrics...</div>;
 
   return (
-    <div className="max-w-6xl mx-auto block w-full space-y-8">
+    <div className="max-w-6xl mx-auto block w-full space-y-8 p-4 sm:p-6">
       
       {/* View Header Meta Title */}
       <div>
@@ -132,7 +146,7 @@ export default function LoanStatusPage() {
         
         {/* LEFT CARD STAGE: DYNAMIC CREDIT CALCULATOR FORM (7 Columns) */}
         <div className="lg:col-span-7 bg-[#1a1b23] border border-white/[0.01] rounded-2xl p-6 sm:p-8 shadow-xl">
-          <div className="flex items-center gap-2 text-orange-400 text-xs font-bold uppercase tracking-wider mb-6">
+          <div className="flex items-center gap-2 text-[#F37121] text-xs font-bold uppercase tracking-wider mb-6">
             <Scale size={14} /> Allocation Adjustment Panel
           </div>
 
@@ -143,7 +157,7 @@ export default function LoanStatusPage() {
               </div>
               <h3 className="text-white font-semibold text-base uppercase tracking-wide">Application Lockout Active</h3>
               <p className="text-slate-400 text-xs max-w-sm mx-auto mt-2 leading-relaxed">
-                You have a {existingLoan.status} credit asset record in processing pipeline hierarchy. Members cannot launch concurrent loan requests.
+                You have an active <span className="text-[#F37121] font-bold">{existingLoan.status}</span> credit asset record in the processing pipeline hierarchy. Members cannot launch concurrent loan requests.
               </p>
             </div>
           ) : maxEligibleLoan === 0 ? (
@@ -153,12 +167,18 @@ export default function LoanStatusPage() {
               </div>
               <h3 className="text-white font-semibold text-base uppercase tracking-wide">Zero Borrowing Allocation</h3>
               <p className="text-slate-400 text-xs max-w-sm mx-auto mt-2 leading-relaxed">
-                Your current CBD SACCO account deposit balance is Ksh 0. Add digital savings to activate your $Ksh\ \text{Savings} \times 3$ borrowing pipeline factor.
+                Your current CBD SACCO account deposit balance is Ksh 0. Add digital savings to activate your borrowing pipeline factor.
               </p>
             </div>
           ) : (
             <form onSubmit={handleLoanApplication} className="space-y-6">
-              
+              {success && (
+                <div className="flex items-start gap-3 bg-emerald-500/10 border border-emerald-500/20 text-xs text-emerald-400 p-4 rounded-xl">
+                  <CheckCircle2 size={14} className="shrink-0 mt-0.5" />
+                  <span>Loan application transmitted successfully into clearance queue.</span>
+                </div>
+              )}
+
               {/* Slider for Requested Value */}
               <div>
                 <div className="flex justify-between text-xs font-semibold uppercase tracking-wider text-slate-400 mb-2">
@@ -172,7 +192,7 @@ export default function LoanStatusPage() {
                   step={500}
                   value={requestedAmount}
                   onChange={(e) => setRequestedAmount(Number(e.target.value))}
-                  className="w-full h-2 bg-[#13141a] rounded-lg appearance-none cursor-pointer accent-orange-500"
+                  className="w-full h-2 bg-[#13141a] rounded-lg appearance-none cursor-pointer accent-[#F37121]"
                 />
                 <div className="flex justify-between text-[10px] text-slate-500 font-medium mt-1">
                   <span>Min: Ksh 1,000</span>
@@ -188,7 +208,7 @@ export default function LoanStatusPage() {
                 <select
                   value={repaymentMonths}
                   onChange={(e) => setRepaymentMonths(Number(e.target.value))}
-                  className="w-full bg-[#13141a] border border-white/[0.04] rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-orange-500/50"
+                  className="w-full bg-[#13141a] border border-white/[0.04] rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-[#F37121]/50"
                 >
                   <option value={3}>3 Months (Short Term Float)</option>
                   <option value={6}>6 Months (Standard Turnaround)</option>
@@ -200,7 +220,7 @@ export default function LoanStatusPage() {
               {/* Guarantor Contact Check */}
               <div>
                 <label className="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-2">
-                  UBTA Registered Peer Guarantor Phone <span className="text-orange-500">*</span>
+                  UBTA Registered Peer Guarantor Phone <span className="text-[#F37121]">*</span>
                 </label>
                 <input
                   type="tel"
@@ -208,7 +228,7 @@ export default function LoanStatusPage() {
                   value={guarantorPhone}
                   onChange={(e) => setGuarantorPhone(e.target.value)}
                   required
-                  className="w-full bg-[#13141a] border border-white/[0.04] rounded-xl px-4 py-3 text-sm text-white placeholder:text-slate-700 focus:outline-none focus:border-orange-500/50"
+                  className="w-full bg-[#13141a] border border-white/[0.04] rounded-xl px-4 py-3 text-sm text-white placeholder:text-slate-700 focus:outline-none focus:border-[#F37121]/50"
                 />
               </div>
 
@@ -222,6 +242,38 @@ export default function LoanStatusPage() {
               <button
                 type="submit"
                 disabled={submitting}
-                className="w-full bg-orange-500 hover:bg-orange-600 disabled:opacity-50 text-white font-bold text-xs uppercase tracking-wider py-4 rounded-xl transition"
+                className="w-full bg-[#F37121] hover:bg-[#d65d14] disabled:opacity-50 text-white text-xs font-bold py-2.5 rounded-lg transition-colors"
               >
-                {submitting ? '
+                {submitting ? "Submitting Request..." : "Apply for Loan"}
+              </button>
+            </form>
+          )}
+        </div>
+
+        {/* RIGHT COLUMN: ACCOUNT SUMMARY STATUS DESK (5 Columns) */}
+        <div className="lg:col-span-5 space-y-4">
+          <div className="bg-[#1a1b23] border border-white/[0.01] rounded-2xl p-6 shadow-xl">
+            <h3 className="text-white font-bold text-xs uppercase tracking-wider mb-4 flex items-center gap-2 text-[#00A651]">
+              <DollarSign size={14} /> Financial Standing Summary
+            </h3>
+            <div className="space-y-4">
+              <div className="flex justify-between items-center border-b border-white/[0.02] pb-3">
+                <span className="text-xs text-slate-400">Total SACCO Deposits</span>
+                <span className="text-sm font-bold text-white font-mono">Ksh {rawSaccoBalance.toLocaleString()}</span>
+              </div>
+              <div className="flex justify-between items-center border-b border-white/[0.02] pb-3">
+                <span className="text-xs text-slate-400">Max Borrowing Capacity</span>
+                <span className="text-sm font-bold text-[#00A651] font-mono">Ksh {maxEligibleLoan.toLocaleString()}</span>
+              </div>
+              <div className="flex justify-between items-center pt-1">
+                <span className="text-xs text-slate-400">Estimated Installment</span>
+                <span className="text-sm font-bold text-[#F37121] font-mono">Ksh {monthlyInstallment.toLocaleString()}/mo</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  );
+}
