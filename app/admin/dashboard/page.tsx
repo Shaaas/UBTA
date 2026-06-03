@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
-import { UBTA_CONFIG } from '@/app/config';
+import { UBTA_CONFIG } from '../../../config';
 
 interface Application {
   id: string;
