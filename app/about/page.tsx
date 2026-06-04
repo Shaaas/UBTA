@@ -61,22 +61,22 @@ const PILLARS = [
 
 const LEADERSHIP_TEAM = [
   {
-    name: "James Muigai",
+    name: "John Njeru",
     role: "Executive Chairman",
     responsibility:
       "Strategic direction, government and county relations, and overall vision execution for UBTA across all Nairobi nodes.",
     image: "/leadership/chairman.jpeg",
   },
   {
-    name: "Sarah Wanjiku",
-    role: "Secretary General",
+    name: "Samuel Ndegwa Mugo",
+    role: "Vice Chairman",
     responsibility:
       "Operations management, member registration systems, document compliance, and institutional partnerships.",
     image: "/leadership/secretary.jpeg",
   },
   {
-    name: "David Ochieng",
-    role: "Treasurer & SACCO Head",
+    name: "Ruth",
+    role: "General Secretary",
     responsibility:
       "Oversight of capital reserves, monthly member contributions, CBD SACCO compliance, and loan disbursement systems.",
     image: "/leadership/treasurer.jpeg",
