@@ -1,152 +1,636 @@
 "use client";
 
-import React, { useState, useEffect } from 'react';
-import { UBTA_CONFIG } from '../../../config';
+import { useState, useEffect, useCallback } from "react";
+import {
+  Users, Search, LogOut, Edit2, X, Check,
+  ChevronLeft, ChevronRight, Phone, CreditCard,
+  MapPin, Bike, Calendar, User, Shield,
+  TrendingUp, RefreshCw, Eye, AlertCircle,
+} from "lucide-react";
 
-interface Application {
-  id: string;
-  fullName: string;
-  phone: string;
-  idNumber: string;
-  kraPin: string;
-  plateNumber: string;
-  baseStage: string;
-  submissionDate: string;
-  status: string;
-  filesUploaded: string[];
+// ─── Types ────────────────────────────────────────────────────────────────────
+
+interface Transaction {
+  mpesa_receipt_number: string;
+  amount: number;
+  transaction_type: string;
+  created_at: string;
 }
 
-export default function AdminDashboard() {
-  const [applications, setApplications] = useState<Application[]>([]);
-  const [selectedApp, setSelectedApp] = useState<Application | null>(null);
+interface Member {
+  id: string;
+  member_number: number;
+  full_name: string;
+  phone_number: string;
+  id_number: string;
+  bike_registration_number: string;
+  working_county: string;
+  sub_county: string;
+  current_operating_location: string;
+  email_address: string | null;
+  date_of_birth: string | null;
+  next_of_kin_name: string | null;
+  next_of_kin_contact: string | null;
+  next_of_kin_relationship: string | null;
+  welfare_balance: number;
+  sacco_balance: number;
+  created_at: string;
+  transactions: Transaction[];
+}
 
-  // Load submissions immediately from browser local environment mock storage matrix
-  useEffect(() => {
-    const data = localStorage.getItem('ubta_applications');
-    if (data) {
-      setApplications(JSON.parse(data));
-    } else {
-      // Seed default sandbox data if clean slate session
-      const seed = [
-        { id: "UBTA-REG-4921", fullName: "Boniface Mwangi Kariuki", phone: "0711999888", idNumber: "32984102", kraPin: "A009182341Z", plateNumber: "KMDQ 412X", baseStage: "Ngara – Fig Tree", submissionDate: "05/14/2026", status: "Pending Verification", filesUploaded: ["idCopy", "kraCopy", "passportPhoto"] },
-        { id: "UBTA-REG-1082", fullName: "Douglas Omwamba", phone: "0722333444", idNumber: "28401923", kraPin: "A003418293M", plateNumber: "KMFE 110A", baseStage: "Githurai 45", submissionDate: "05/12/2026", status: "Approved / Hardware Active", filesUploaded: ["idCopy", "kraCopy", "passportPhoto"] }
-      ];
-      localStorage.setItem('ubta_applications', JSON.stringify(seed));
-      setApplications(seed);
+interface AdminInfo {
+  name: string;
+  role: "chairman" | "secretary";
+  email: string;
+}
+
+// ─── Helpers ──────────────────────────────────────────────────────────────────
+
+function fmt(date: string) {
+  return new Date(date).toLocaleDateString("en-KE", {
+    day: "numeric", month: "short", year: "numeric",
+  });
+}
+
+function fmtMoney(n: number) {
+  return `Ksh ${n.toLocaleString()}`;
+}
+
+// ─── Sub-components ───────────────────────────────────────────────────────────
+
+function StatCard({ label, value, icon: Icon, color }: {
+  label: string; value: string | number;
+  icon: React.ElementType; color: string;
+}) {
+  return (
+    <div className="bg-[#111827] border border-gray-800 rounded-xl p-5 flex items-center gap-4">
+      <div className={`w-11 h-11 rounded-xl flex items-center justify-center shrink-0 ${color}`}>
+        <Icon size={20} />
+      </div>
+      <div>
+        <p className="text-gray-500 text-xs font-semibold uppercase tracking-wider">{label}</p>
+        <p className="text-white font-black text-xl mt-0.5">{value}</p>
+      </div>
+    </div>
+  );
+}
+
+function MemberRow({
+  member, isChairman, onView, onEdit,
+}: {
+  member: Member;
+  isChairman: boolean;
+  onView: (m: Member) => void;
+  onEdit: (m: Member) => void;
+}) {
+  const latestTx = member.transactions?.[0];
+  return (
+    <tr className="border-b border-gray-800/60 hover:bg-gray-800/20 transition-colors">
+      <td className="px-4 py-3.5 text-sm">
+        <span className="font-black text-orange-400 font-mono">#{member.member_number}</span>
+      </td>
+      <td className="px-4 py-3.5">
+        <div className="font-semibold text-white text-sm">{member.full_name}</div>
+        <div className="text-gray-500 text-xs mt-0.5">{member.phone_number}</div>
+      </td>
+      <td className="px-4 py-3.5 text-gray-400 text-sm font-mono">{member.id_number}</td>
+      <td className="px-4 py-3.5 text-gray-400 text-xs">{member.working_county}</td>
+      <td className="px-4 py-3.5 text-gray-400 text-xs font-mono uppercase">{member.bike_registration_number}</td>
+      <td className="px-4 py-3.5">
+        {latestTx ? (
+          <div>
+            <span className={`text-xs font-bold px-2 py-0.5 rounded-md ${
+              latestTx.transaction_type.includes("paid")
+                ? "bg-green-500/10 text-green-400"
+                : latestTx.transaction_type.includes("failed")
+                ? "bg-red-500/10 text-red-400"
+                : "bg-orange-500/10 text-orange-400"
+            }`}>
+              {latestTx.transaction_type.replace(/_/g, " ")}
+            </span>
+            <div className="text-gray-600 text-[10px] mt-1">{latestTx.mpesa_receipt_number}</div>
+          </div>
+        ) : (
+          <span className="text-gray-600 text-xs">No transaction</span>
+        )}
+      </td>
+      <td className="px-4 py-3.5 text-gray-400 text-xs">{fmt(member.created_at)}</td>
+      <td className="px-4 py-3.5">
+        <div className="flex items-center gap-2">
+          <button onClick={() => onView(member)}
+            className="p-1.5 text-gray-500 hover:text-white hover:bg-gray-800 rounded-lg transition-all"
+            title="View details">
+            <Eye size={14} />
+          </button>
+          {isChairman && (
+            <button onClick={() => onEdit(member)}
+              className="p-1.5 text-gray-500 hover:text-orange-400 hover:bg-orange-500/10 rounded-lg transition-all"
+              title="Edit member">
+              <Edit2 size={14} />
+            </button>
+          )}
+        </div>
+      </td>
+    </tr>
+  );
+}
+
+function MemberModal({ member, isChairman, onClose, onSave }: {
+  member: Member;
+  isChairman: boolean;
+  onClose: () => void;
+  onSave: (id: string, updates: Partial<Member>) => Promise<void>;
+}) {
+  const [editing, setEditing] = useState(false);
+  const [saving,  setSaving]  = useState(false);
+  const [error,   setError]   = useState<string | null>(null);
+  const [form, setForm] = useState({
+    full_name:                  member.full_name,
+    phone_number:               member.phone_number,
+    id_number:                  member.id_number,
+    bike_registration_number:   member.bike_registration_number,
+    working_county:             member.working_county,
+    sub_county:                 member.sub_county,
+    current_operating_location: member.current_operating_location,
+    email_address:              member.email_address ?? "",
+    next_of_kin_name:           member.next_of_kin_name ?? "",
+    next_of_kin_contact:        member.next_of_kin_contact ?? "",
+    next_of_kin_relationship:   member.next_of_kin_relationship ?? "",
+    welfare_balance:            member.welfare_balance,
+    sacco_balance:              member.sacco_balance,
+  });
+
+  const handleSave = async () => {
+    setSaving(true);
+    setError(null);
+    try {
+      await onSave(member.id, form);
+      setEditing(false);
+    } catch (e: unknown) {
+      setError(e instanceof Error ? e.message : "Save failed");
+    } finally {
+      setSaving(false);
     }
-  }, []);
+  };
 
-  const updateStatus = (id: string, newStatus: string) => {
-    const updated = applications.map(app => app.id === id ? { ...app, status: newStatus } : app);
-    setApplications(updated);
-    localStorage.setItem('ubta_applications', JSON.stringify(updated));
-    if (selectedApp && selectedApp.id === id) {
-      setSelectedApp({ ...selectedApp, status: newStatus });
+  const Field = ({ label, field, type = "text" }: {
+    label: string; field: keyof typeof form; type?: string;
+  }) => (
+    <div>
+      <label className="block text-[11px] font-bold text-gray-500 uppercase tracking-widest mb-1.5">
+        {label}
+      </label>
+      {editing ? (
+        <input
+          type={type}
+          value={form[field] as string}
+          onChange={(e) => setForm((p) => ({ ...p, [field]: type === "number" ? Number(e.target.value) : e.target.value }))}
+          className="w-full bg-[#0B0F19] border border-gray-700 rounded-lg px-3 py-2.5 text-white text-sm
+                     focus:outline-none focus:border-orange-500/60 transition-all"
+        />
+      ) : (
+        <p className="text-white text-sm font-medium">
+          {(form[field] as string | number) || <span className="text-gray-600">—</span>}
+        </p>
+      )}
+    </div>
+  );
+
+  return (
+    <div className="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-start justify-center p-4 overflow-y-auto">
+      <div className="bg-[#111827] border border-gray-800 rounded-2xl w-full max-w-2xl my-8 shadow-2xl">
+
+        {/* Header */}
+        <div className="flex items-center justify-between p-6 border-b border-gray-800">
+          <div>
+            <div className="flex items-center gap-3">
+              <span className="font-black text-orange-400 text-lg font-mono">
+                #{member.member_number}
+              </span>
+              <h2 className="font-black text-white text-lg uppercase tracking-tight">
+                {member.full_name}
+              </h2>
+            </div>
+            <p className="text-gray-500 text-xs mt-1">Registered {fmt(member.created_at)}</p>
+          </div>
+          <div className="flex items-center gap-2">
+            {isChairman && !editing && (
+              <button onClick={() => setEditing(true)}
+                className="flex items-center gap-1.5 px-3 py-2 bg-orange-500/10 border border-orange-500/30
+                           text-orange-400 text-xs font-bold rounded-lg hover:bg-orange-500/20 transition-all">
+                <Edit2 size={13} /> Edit
+              </button>
+            )}
+            {editing && (
+              <>
+                <button onClick={handleSave} disabled={saving}
+                  className="flex items-center gap-1.5 px-3 py-2 bg-green-500/10 border border-green-500/30
+                             text-green-400 text-xs font-bold rounded-lg hover:bg-green-500/20 transition-all disabled:opacity-50">
+                  {saving ? <RefreshCw size={13} className="animate-spin" /> : <Check size={13} />}
+                  {saving ? "Saving..." : "Save"}
+                </button>
+                <button onClick={() => { setEditing(false); setError(null); }}
+                  className="flex items-center gap-1.5 px-3 py-2 bg-gray-800 text-gray-400 text-xs font-bold rounded-lg hover:bg-gray-700 transition-all">
+                  <X size={13} /> Cancel
+                </button>
+              </>
+            )}
+            <button onClick={onClose}
+              className="p-2 text-gray-500 hover:text-white hover:bg-gray-800 rounded-lg transition-all">
+              <X size={16} />
+            </button>
+          </div>
+        </div>
+
+        {error && (
+          <div className="mx-6 mt-4 flex items-center gap-2 bg-red-500/10 border border-red-500/30 text-red-400 text-xs rounded-xl px-4 py-3">
+            <AlertCircle size={14} /> {error}
+          </div>
+        )}
+
+        <div className="p-6 space-y-6">
+
+          {/* Balances */}
+          <div className="grid grid-cols-2 gap-4">
+            <div className="bg-[#0B0F19] border border-gray-800 rounded-xl p-4">
+              <p className="text-gray-500 text-[11px] font-bold uppercase tracking-wider mb-1">Welfare Balance</p>
+              {editing ? (
+                <input type="number" value={form.welfare_balance}
+                  onChange={(e) => setForm((p) => ({ ...p, welfare_balance: Number(e.target.value) }))}
+                  className="w-full bg-transparent border-b border-gray-700 text-green-400 font-black text-xl
+                             focus:outline-none focus:border-orange-500 pb-1" />
+              ) : (
+                <p className="text-green-400 font-black text-xl font-mono">{fmtMoney(form.welfare_balance)}</p>
+              )}
+            </div>
+            <div className="bg-[#0B0F19] border border-gray-800 rounded-xl p-4">
+              <p className="text-gray-500 text-[11px] font-bold uppercase tracking-wider mb-1">SACCO Balance</p>
+              {editing ? (
+                <input type="number" value={form.sacco_balance}
+                  onChange={(e) => setForm((p) => ({ ...p, sacco_balance: Number(e.target.value) }))}
+                  className="w-full bg-transparent border-b border-gray-700 text-teal-400 font-black text-xl
+                             focus:outline-none focus:border-orange-500 pb-1" />
+              ) : (
+                <p className="text-teal-400 font-black text-xl font-mono">{fmtMoney(form.sacco_balance)}</p>
+              )}
+            </div>
+          </div>
+
+          {/* Personal details */}
+          <div>
+            <p className="text-[11px] font-black text-gray-500 uppercase tracking-widest mb-4">Personal Details</p>
+            <div className="grid sm:grid-cols-2 gap-4">
+              <Field label="Full Name"        field="full_name" />
+              <Field label="Phone Number"     field="phone_number" />
+              <Field label="National ID"      field="id_number" />
+              <Field label="Email Address"    field="email_address" type="email" />
+              <Field label="Bike Plate"       field="bike_registration_number" />
+              <Field label="County"           field="working_county" />
+              <Field label="Sub-County"       field="sub_county" />
+              <Field label="Stage Node"       field="current_operating_location" />
+            </div>
+          </div>
+
+          {/* Next of kin */}
+          <div>
+            <p className="text-[11px] font-black text-gray-500 uppercase tracking-widest mb-4">Next of Kin</p>
+            <div className="grid sm:grid-cols-3 gap-4">
+              <Field label="Name"         field="next_of_kin_name" />
+              <Field label="Phone"        field="next_of_kin_contact" />
+              <Field label="Relationship" field="next_of_kin_relationship" />
+            </div>
+          </div>
+
+          {/* Transactions */}
+          {member.transactions?.length > 0 && (
+            <div>
+              <p className="text-[11px] font-black text-gray-500 uppercase tracking-widest mb-4">Payment History</p>
+              <div className="space-y-2">
+                {member.transactions.map((tx, i) => (
+                  <div key={i} className="flex items-center justify-between bg-[#0B0F19] border border-gray-800 rounded-xl px-4 py-3">
+                    <div>
+                      <p className="text-white text-xs font-bold">{tx.transaction_type.replace(/_/g, " ")}</p>
+                      <p className="text-gray-500 text-[11px] font-mono mt-0.5">{tx.mpesa_receipt_number}</p>
+                    </div>
+                    <div className="text-right">
+                      <p className="text-orange-400 font-black text-sm">{fmtMoney(tx.amount)}</p>
+                      <p className="text-gray-600 text-[11px]">{fmt(tx.created_at)}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ─── Login page ───────────────────────────────────────────────────────────────
+
+function AdminLogin({ onLogin }: { onLogin: (info: AdminInfo) => void }) {
+  const [email,    setEmail]    = useState("");
+  const [password, setPassword] = useState("");
+  const [loading,  setLoading]  = useState(false);
+  const [error,    setError]    = useState<string | null>(null);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError(null);
+    setLoading(true);
+    try {
+      const res  = await fetch("/api/auth/admin-login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        setError(data.error ?? "Login failed");
+      } else {
+        onLogin({ name: data.name, role: data.role, email });
+      }
+    } catch {
+      setError("Network error. Please try again.");
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
-    <div className="min-h-[calc(100vh-73px)] bg-[#0B0F19] text-white px-4 sm:px-6 py-12">
-      <div className="max-w-7xl mx-auto space-y-8">
-        
-        {/* Core Administrative Bar */}
-        <div className="border-b border-gray-800 pb-6 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-          <div>
-            <span className="text-xs font-bold text-[#2096D4] uppercase tracking-widest bg-[#2096D4]/10 px-2.5 py-1 rounded">Security Hierarchy Clearances Only</span>
-            <h1 className="text-3xl font-black mt-2">UBTA Core Central Management Desk</h1>
-          </div>
-          <div className="bg-[#111827] border border-gray-800 rounded-lg px-4 py-2 text-xs font-mono">
-            Total Application Node Records: <strong className="text-[#2096D4]">{applications.length}</strong>
-          </div>
+    <div className="min-h-screen bg-[#0B0F19] flex items-center justify-center px-4">
+      <div className="w-full max-w-sm">
+        <div className="text-center mb-8">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src="/logo.jpeg" alt="UBTA" className="w-14 h-14 rounded-full mx-auto mb-4 bg-white p-1" />
+          <h1 className="font-black text-white text-2xl uppercase tracking-tight">Admin Portal</h1>
+          <p className="text-gray-500 text-xs mt-1">United Boda Transport Association</p>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          
-          {/* Left Columns - Applications Index Table */}
-          <div className="lg:col-span-2 space-y-4">
-            <h2 className="text-sm font-bold text-gray-400 uppercase tracking-wider">Incoming Registration Queues</h2>
-            
-            <div className="bg-[#111827] border border-gray-800 rounded-2xl overflow-hidden shadow-xl">
-              <div className="overflow-x-auto">
-                <table className="w-full text-left border-collapse text-xs sm:text-sm">
-                  <thead>
-                    <tr className="bg-[#0B0F19] border-b border-gray-800 text-gray-400 font-bold text-[11px] uppercase tracking-wider">
-                      <th className="p-4">Rider Details</th>
-                      <th className="p-4">Operational Stage</th>
-                      <th className="p-4">Compliance Status</th>
-                      <th className="p-4 text-right">Action</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-gray-800/60">
-                    {applications.map((app) => (
-                      <tr key={app.id} className="hover:bg-gray-800/20 transition-colors">
-                        <td className="p-4">
-                          <p className="font-bold text-white">{app.fullName}</p>
-                          <p className="text-[11px] font-mono text-gray-500 mt-0.5">{app.phone} | ID: {app.idNumber}</p>
-                        </td>
-                        <td className="p-4 text-gray-300 font-medium">
-                          📍 {app.baseStage}
-                        </td>
-                        <td className="p-4">
-                          <span className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase ${
-                            app.status.includes('Approved') ? 'bg-[#00A651]/20 text-[#00A651]' : 'bg-yellow-500/10 text-yellow-500'
-                          }`}>
-                            {app.status}
-                          </span>
-                        </td>
-                        <td className="p-4 text-right">
-                          <button onClick={() => setSelectedApp(app)} className="px-3 py-1 bg-gray-800 border border-gray-700 text-xs font-bold rounded hover:border-[#2096D4] transition-colors">
-                            Audit File
-                          </button>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
+        <div className="bg-[#111827] border border-gray-800 rounded-2xl p-6 shadow-2xl">
+          <div className="flex items-center gap-2 mb-6 pb-4 border-b border-gray-800">
+            <Shield size={16} className="text-orange-400" />
+            <span className="text-white font-bold text-sm">Restricted Access</span>
+          </div>
+
+          {error && (
+            <div className="flex items-center gap-2 bg-red-500/10 border border-red-500/30 text-red-400 text-xs rounded-xl px-4 py-3 mb-4">
+              <AlertCircle size={14} /> {error}
+            </div>
+          )}
+
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div>
+              <label className="block text-[11px] font-bold text-gray-500 uppercase tracking-widest mb-2">
+                Email Address
+              </label>
+              <input type="email" value={email} onChange={(e) => setEmail(e.target.value)}
+                placeholder="admin@ubta.co.ke" required
+                className="w-full bg-[#0B0F19] border border-gray-800 rounded-xl px-4 py-3 text-white text-sm
+                           placeholder:text-gray-700 focus:outline-none focus:border-orange-500/60 transition-all" />
+            </div>
+            <div>
+              <label className="block text-[11px] font-bold text-gray-500 uppercase tracking-widest mb-2">
+                Password
+              </label>
+              <input type="password" value={password} onChange={(e) => setPassword(e.target.value)}
+                placeholder="••••••••" required
+                className="w-full bg-[#0B0F19] border border-gray-800 rounded-xl px-4 py-3 text-white text-sm
+                           placeholder:text-gray-700 focus:outline-none focus:border-orange-500/60 transition-all" />
+            </div>
+            <button type="submit" disabled={loading}
+              className="w-full bg-orange-500 hover:bg-orange-600 disabled:opacity-60 text-white font-bold
+                         uppercase tracking-wide py-3.5 rounded-xl transition-all flex items-center justify-center gap-2 text-sm">
+              {loading
+                ? <><span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" /> Signing in...</>
+                : <><Shield size={15} /> Sign In</>}
+            </button>
+          </form>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ─── Main dashboard ───────────────────────────────────────────────────────────
+
+export default function AdminDashboard() {
+  const [admin,        setAdmin]        = useState<AdminInfo | null>(null);
+  const [members,      setMembers]      = useState<Member[]>([]);
+  const [total,        setTotal]        = useState(0);
+  const [page,         setPage]         = useState(1);
+  const [search,       setSearch]       = useState("");
+  const [searchInput,  setSearchInput]  = useState("");
+  const [loading,      setLoading]      = useState(false);
+  const [viewMember,   setViewMember]   = useState<Member | null>(null);
+  const [editMember,   setEditMember]   = useState<Member | null>(null);
+
+  const isChairman = admin?.role === "chairman";
+  const totalPages = Math.ceil(total / 20);
+
+  const fetchMembers = useCallback(async () => {
+    if (!admin) return;
+    setLoading(true);
+    try {
+      const res  = await fetch(`/api/admin/members?page=${page}&search=${encodeURIComponent(search)}`);
+      const data = await res.json();
+      if (res.ok) {
+        setMembers(data.members ?? []);
+        setTotal(data.total ?? 0);
+      }
+    } finally {
+      setLoading(false);
+    }
+  }, [admin, page, search]);
+
+  useEffect(() => { fetchMembers(); }, [fetchMembers]);
+
+  const handleSave = async (id: string, updates: Partial<Member>) => {
+    const res  = await fetch("/api/admin/members", {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ id, ...updates }),
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error);
+    setMembers((prev) => prev.map((m) => m.id === id ? { ...m, ...updates } : m));
+    setViewMember((prev) => prev?.id === id ? { ...prev, ...updates } as Member : prev);
+    setEditMember(null);
+  };
+
+  const handleLogout = async () => {
+    await fetch("/api/auth/admin-logout", { method: "POST" });
+    setAdmin(null);
+    setMembers([]);
+  };
+
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    setSearch(searchInput);
+    setPage(1);
+  };
+
+  if (!admin) return <AdminLogin onLogin={setAdmin} />;
+
+  return (
+    <div className="min-h-screen bg-[#0B0F19] text-white">
+
+      {/* Top bar */}
+      <div className="bg-[#111827] border-b border-gray-800 sticky top-0 z-40">
+        <div className="h-[2px] bg-gradient-to-r from-orange-500 via-green-600 to-orange-500" />
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-3.5 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src="/logo.jpeg" alt="UBTA" className="w-8 h-8 rounded-full bg-white p-0.5" />
+            <div>
+              <span className="font-black text-white text-sm">UBTA Admin</span>
+              <span className={`ml-2 text-[10px] font-bold uppercase px-2 py-0.5 rounded-md
+                ${isChairman ? "bg-orange-500/10 text-orange-400" : "bg-blue-500/10 text-blue-400"}`}>
+                {admin.role}
+              </span>
+            </div>
+          </div>
+          <div className="flex items-center gap-3">
+            <span className="text-gray-500 text-xs hidden sm:block">{admin.name}</span>
+            <button onClick={handleLogout}
+              className="flex items-center gap-1.5 px-3 py-2 text-gray-500 hover:text-white
+                         hover:bg-gray-800 rounded-lg text-xs font-semibold transition-all">
+              <LogOut size={13} /> Sign out
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 py-8 space-y-8">
+
+        {/* Stats */}
+        {isChairman && (
+          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <StatCard label="Total Members"   value={total}  icon={Users}     color="bg-orange-500/10 text-orange-400" />
+            <StatCard label="Latest Member #" value={members[0]?.member_number ?? "—"} icon={CreditCard} color="bg-teal-500/10 text-teal-400" />
+            <StatCard label="Counties Active" value={[...new Set(members.map((m) => m.working_county))].length} icon={MapPin} color="bg-blue-500/10 text-blue-400" />
+            <StatCard label="Total SACCO Bal" value={fmtMoney(members.reduce((s, m) => s + m.sacco_balance, 0))} icon={TrendingUp} color="bg-green-500/10 text-green-400" />
+          </div>
+        )}
+
+        {/* Members table */}
+        <div className="bg-[#111827] border border-gray-800 rounded-2xl overflow-hidden">
+
+          {/* Table header */}
+          <div className="p-5 border-b border-gray-800 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+            <div>
+              <h2 className="font-black text-white text-lg uppercase tracking-tight">Members</h2>
+              <p className="text-gray-500 text-xs mt-0.5">{total} registered members</p>
+            </div>
+            <div className="flex items-center gap-3 w-full sm:w-auto">
+              <form onSubmit={handleSearch} className="flex gap-2 flex-1 sm:flex-none">
+                <div className="relative flex-1 sm:w-64">
+                  <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500" />
+                  <input
+                    value={searchInput}
+                    onChange={(e) => setSearchInput(e.target.value)}
+                    placeholder="Name, phone, ID, or member #"
+                    className="w-full bg-[#0B0F19] border border-gray-800 rounded-xl pl-9 pr-4 py-2.5
+                               text-white text-xs placeholder:text-gray-700
+                               focus:outline-none focus:border-orange-500/60 transition-all"
+                  />
+                </div>
+                <button type="submit"
+                  className="px-4 py-2.5 bg-orange-500 hover:bg-orange-600 text-white text-xs font-bold rounded-xl transition-all">
+                  Search
+                </button>
+              </form>
+              <button onClick={fetchMembers}
+                className="p-2.5 text-gray-500 hover:text-white hover:bg-gray-800 rounded-xl transition-all">
+                <RefreshCw size={15} className={loading ? "animate-spin" : ""} />
+              </button>
             </div>
           </div>
 
-          {/* Right Column - Deep-Dive File Audit Details Panel */}
-          <div className="space-y-4">
-            <h2 className="text-sm font-bold text-gray-400 uppercase tracking-wider">Document Audit Verification Block</h2>
-            
-            {selectedApp ? (
-              <div className="bg-[#111827] border border-gray-800 rounded-2xl p-6 shadow-xl space-y-6">
-                <div>
-                  <span className="text-[10px] font-mono font-bold text-gray-500 block">{selectedApp.id}</span>
-                  <h3 className="text-lg font-black text-white mt-0.5">{selectedApp.fullName}</h3>
-                  <p className="text-xs text-gray-400 mt-1">Submitted on system track: {selectedApp.submissionDate}</p>
-                </div>
-
-                <div className="space-y-3 pt-4 border-t border-gray-800/60 text-xs font-mono">
-                  <p><strong className="text-gray-500 font-sans">KRA PIN:</strong> <span className="text-white uppercase">{selectedApp.kraPin}</span></p>
-                  <p><strong className="text-gray-500 font-sans">Motorbike Plate:</strong> <span className="text-[#F37121] uppercase">{selectedApp.plateNumber}</span></p>
-                  <p><strong className="text-gray-500 font-sans">Verification Files:</strong> <span className="text-[#00A651]">{selectedApp.filesUploaded.length}/3 Valid Attachments</span></p>
-                </div>
-
-                <div className="pt-4 border-t border-gray-800/60 space-y-2">
-                  <label className="block text-[10px] font-bold text-gray-400 uppercase tracking-wider">Execute Status Mutator Action</label>
-                  <div className="grid grid-cols-2 gap-2">
-                    <button onClick={() => updateStatus(selectedApp.id, 'Approved / Hardware Active')} className="py-2 bg-[#00A651] text-white font-bold text-xs rounded-lg hover:opacity-90">
-                      Approve & Activate
-                    </button>
-                    <button onClick={() => updateStatus(selectedApp.id, 'Flagged / Review Required')} className="py-2 bg-red-600 text-white font-bold text-xs rounded-lg hover:opacity-90">
-                      Reject File
-                    </button>
-                  </div>
-                </div>
-              </div>
-            ) : (
-              <div className="bg-[#111827]/40 border border-gray-800 border-dashed rounded-2xl p-8 text-center text-xs text-gray-500">
-                Select an active registration file from the tracking dashboard queue to begin vetting metrics.
-              </div>
-            )}
+          {/* Table */}
+          <div className="overflow-x-auto">
+            <table className="w-full">
+              <thead>
+                <tr className="border-b border-gray-800/60">
+                  {["#", "Member", "ID Number", "County", "Plate", "Status", "Joined", ""].map((h) => (
+                    <th key={h} className="px-4 py-3 text-left text-[11px] font-bold text-gray-500 uppercase tracking-widest">
+                      {h}
+                    </th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {loading ? (
+                  <tr>
+                    <td colSpan={8} className="px-4 py-12 text-center text-gray-500 text-sm">
+                      <RefreshCw size={20} className="animate-spin mx-auto mb-2" />
+                      Loading members...
+                    </td>
+                  </tr>
+                ) : members.length === 0 ? (
+                  <tr>
+                    <td colSpan={8} className="px-4 py-12 text-center text-gray-500 text-sm">
+                      {search ? "No members match your search" : "No members yet"}
+                    </td>
+                  </tr>
+                ) : (
+                  members.map((m) => (
+                    <MemberRow
+                      key={m.id}
+                      member={m}
+                      isChairman={isChairman}
+                      onView={setViewMember}
+                      onEdit={setEditMember}
+                    />
+                  ))
+                )}
+              </tbody>
+            </table>
           </div>
 
+          {/* Pagination */}
+          {totalPages > 1 && (
+            <div className="p-4 border-t border-gray-800 flex items-center justify-between">
+              <p className="text-gray-500 text-xs">
+                Page {page} of {totalPages} · {total} members
+              </p>
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => setPage((p) => Math.max(1, p - 1))}
+                  disabled={page === 1}
+                  className="p-2 text-gray-500 hover:text-white hover:bg-gray-800 rounded-lg disabled:opacity-30 transition-all">
+                  <ChevronLeft size={15} />
+                </button>
+                <button
+                  onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+                  disabled={page === totalPages}
+                  className="p-2 text-gray-500 hover:text-white hover:bg-gray-800 rounded-lg disabled:opacity-30 transition-all">
+                  <ChevronRight size={15} />
+                </button>
+              </div>
+            </div>
+          )}
         </div>
-
       </div>
+
+      {/* Modals */}
+      {viewMember && (
+        <MemberModal
+          member={viewMember}
+          isChairman={isChairman}
+          onClose={() => setViewMember(null)}
+          onSave={handleSave}
+        />
+      )}
+      {editMember && (
+        <MemberModal
+          member={editMember}
+          isChairman={isChairman}
+          onClose={() => setEditMember(null)}
+          onSave={handleSave}
+        />
+      )}
     </div>
   );
 }
