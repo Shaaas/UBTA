@@ -129,7 +129,7 @@ export default function Footer() {
           © 2026 CBD United Boda Transport Co-Operative Society Limited. All Rights Reserved.
         </p>
         <p className="font-semibold text-gray-500 tracking-wide">
-          Built by <span className="text-[#F37121] hover:underline cursor-pointer">Mutanu Studio</span>
+          Built by <span className="text-[#F37121] hover:underline cursor-pointer">Mysa studio</span>
         </p>
       </div>
     </footer>
