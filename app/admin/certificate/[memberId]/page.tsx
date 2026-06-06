@@ -51,11 +51,20 @@ export default async function CertificatePage({
           body { margin: 0; }
         }
       `}</style>
+
+      {/* Auto-trigger print if ?print=true */}
+      <script dangerouslySetInnerHTML={{ __html: `
+        if (window.location.search.includes('print=true')) {
+          window.onload = function() {
+            setTimeout(function() { window.print(); }, 800);
+          };
+        }
+      `}} />
+
       <div
         className="no-print"
         style={{
           position: "fixed", top: 16, right: 16, zIndex: 9999,
-          display: "flex", gap: 10,
         }}
       >
         <button
@@ -69,6 +78,7 @@ export default async function CertificatePage({
           Save as PDF
         </button>
       </div>
+
       <div dangerouslySetInnerHTML={{ __html: html }} />
     </>
   );

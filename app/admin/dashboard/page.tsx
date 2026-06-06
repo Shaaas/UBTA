@@ -213,34 +213,16 @@ function MemberModal({ member, isChairman, onClose, onSave, onVerified }: {
       const certData = await certRes.json();
       if (!certRes.ok) throw new Error(certData.error ?? "Certificate generation failed");
 
-      // Step 3: generate PDF client-side using html2pdf loaded from CDN
-      const baseUrl = window.location.origin;
-      const certPageRes = await fetch(`${baseUrl}/admin/certificate/${member.id}`);
-      const certHTML    = await certPageRes.text();
-
-      const parser  = new DOMParser();
-      const doc     = parser.parseFromString(certHTML, "text/html");
-      const certDiv = doc.body;
-
-      // @ts-expect-error html2pdf loaded via CDN onto window
-      const html2pdf = window.html2pdf;
-      if (html2pdf) {
-        await html2pdf()
-          .set({
-            margin:      0,
-            filename:    `UBTA${member.member_number}-${member.full_name.replace(/\s+/g, "-")}.pdf`,
-            image:       { type: "jpeg", quality: 0.98 },
-            html2canvas: { scale: 2, useCORS: true, logging: false },
-            jsPDF:       { unit: "px", format: [1122, 794], orientation: "landscape" },
-          })
-          .from(certDiv)
-          .save();
-      }
+      // Step 3: open certificate page — auto-triggers print/save dialog
+      window.open(
+        `${window.location.origin}/admin/certificate/${member.id}?print=true`,
+        "_blank"
+      );
 
       // Step 4: open WhatsApp after short delay
       setTimeout(() => {
         window.open(certData.whatsappLink, "_blank");
-      }, 1500);
+      }, 2000);
 
       setCertResult({
         certificateUrl: certData.certificateUrl,
@@ -254,15 +236,6 @@ function MemberModal({ member, isChairman, onClose, onSave, onVerified }: {
       setIssuing(false);
     }
   };
-
-  // Load html2pdf from CDN
-  useEffect(() => {
-    const script    = document.createElement("script");
-    script.src      = "https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js";
-    script.async    = true;
-    document.head.appendChild(script);
-    return () => { document.head.removeChild(script); };
-  }, []);
 
   const InlineField = ({ label, field, type = "text" }: {
     label: string; field: keyof typeof form; type?: string;
@@ -366,10 +339,10 @@ function MemberModal({ member, isChairman, onClose, onSave, onVerified }: {
             ) : certResult ? (
               <div className="bg-green-500/10 border border-green-500/30 rounded-xl p-4 space-y-3">
                 <p className="text-green-400 text-xs font-bold uppercase tracking-wider">
-                  ✓ Certificate downloaded — WhatsApp opened
+                  ✓ Certificate opened — WhatsApp ready
                 </p>
                 <p className="text-slate-400 text-xs">
-                  Attach the downloaded PDF in the WhatsApp chat and send it to the member.
+                  Save the certificate as PDF from the print dialog, then send the WhatsApp message to the member.
                 </p>
                 <a href={certResult.whatsappLink} target="_blank" rel="noopener noreferrer"
                   className="flex items-center justify-center gap-2 w-full bg-green-600 hover:bg-green-700
@@ -392,7 +365,7 @@ function MemberModal({ member, isChairman, onClose, onSave, onVerified }: {
                              disabled:opacity-60 disabled:cursor-not-allowed text-white font-bold text-sm
                              uppercase tracking-wide py-3.5 rounded-xl transition-all">
                   {issuing ? (
-                    <><RefreshCw size={14} className="animate-spin" /> Generating Certificate...</>
+                    <><RefreshCw size={14} className="animate-spin" /> Verifying...</>
                   ) : (
                     <><ShieldCheck size={14} /> Verify & Issue Certificate</>
                   )}
