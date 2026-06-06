@@ -45,13 +45,13 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Member not found" }, { status: 404 });
     }
 
-    // Update member status to verified
+    // Mark as verified
     await supabase
       .from("profiles")
       .update({ status: "verified" })
       .eq("id", memberId);
 
-    const baseUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://ubta.co.ke";
+    const baseUrl        = process.env.NEXT_PUBLIC_SITE_URL ?? "https://ubta.co.ke";
     const certificateUrl = `${baseUrl}/admin/certificate/${memberId}`;
 
     const phone = member.phone_number.startsWith("254")
