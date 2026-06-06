@@ -84,14 +84,12 @@ const EMPTY_AFFILIATE: AffiliateForm = {
 // ─── Fee calculator ───────────────────────────────────────────────────────────
 
 function getFees(opt: MembershipOption) {
-  const base = { registration: 1000, office: 200 };
-  if (opt === "ubta_only")  return [{ label: "UBTA Registration Fee", amount: base.registration }, { label: "UBTA Office Management", amount: base.office }];
-  if (opt === "sacco_only") return [{ label: "CBD SACCO Registration Fee", amount: base.registration }, { label: "SACCO Office Management", amount: base.office }];
+  const base = { registration: 1000 };
+  if (opt === "ubta_only")  return [{ label: "UBTA Registration Fee", amount: base.registration }];
+  if (opt === "sacco_only") return [{ label: "CBD SACCO Registration Fee", amount: base.registration }];
   if (opt === "both")       return [
     { label: "UBTA Registration Fee", amount: base.registration },
-    { label: "UBTA Office Management", amount: base.office },
     { label: "CBD SACCO Registration Fee", amount: base.registration },
-    { label: "SACCO Office Management", amount: base.office },
   ];
   return [];
 }
@@ -408,7 +406,7 @@ export default function RegisterPage() {
         id: "ubta_only",
         label: "UBTA Membership Only",
         sub: "Join the association. Access leadership, welfare, and advocacy services.",
-        fees: "Ksh 1,200 (Ksh 1,000 reg + Ksh 200 office)",
+        fees: "Ksh 1,000",
         color: "border-orange-500/60 bg-orange-500/5",
         accent: "text-orange-400",
       },
@@ -416,7 +414,7 @@ export default function RegisterPage() {
         id: "sacco_only",
         label: "CBD SACCO Only",
         sub: "Join the cooperative. Save monthly, build credit, access loans up to 3× savings.",
-        fees: "Ksh 1,200 (Ksh 1,000 reg + Ksh 200 office)",
+        fees: "Ksh 1,000",
         color: "border-teal-500/60 bg-teal-500/5",
         accent: "text-teal-400",
       },
@@ -424,7 +422,7 @@ export default function RegisterPage() {
         id: "both",
         label: "UBTA + CBD SACCO",
         sub: "Full membership — join both the association and the cooperative for complete benefits.",
-        fees: "Ksh 2,400 total (Ksh 1,200 per membership)",
+        fees: "Ksh 2,000 total (Ksh 1,000 per membership)",
         color: "border-green-500/60 bg-green-500/5",
         accent: "text-green-400",
       },
