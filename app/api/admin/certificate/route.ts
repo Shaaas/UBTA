@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 import { jwtVerify } from "jose";
+import chromium from "@sparticuz/chromium";
+import puppeteer from "puppeteer-core";
 import { generateCertificateHTML, CertificateData } from "../../../../lib/certificate-template";
 
 const supabase = createClient(
@@ -23,6 +25,8 @@ async function verifyAdmin(req: NextRequest) {
   }
 }
 
+export const maxDuration = 60;
+
 export async function POST(req: NextRequest) {
   const admin = await verifyAdmin(req);
   if (!admin) {
@@ -31,12 +35,11 @@ export async function POST(req: NextRequest) {
 
   try {
     const { memberId } = await req.json();
-
     if (!memberId) {
       return NextResponse.json({ error: "memberId required" }, { status: 400 });
     }
 
-    // ── 1. Fetch member + latest transaction ──────────────────────────────────
+    // ── 1. Fetch member ───────────────────────────────────────────────────────
     const { data: member, error: memberError } = await supabase
       .from("profiles")
       .select(`
@@ -51,7 +54,11 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Member not found" }, { status: 404 });
     }
 
-    const latestTx = member.transactions?.[0];
+    const latestTx = (member.transactions as Array<{
+      mpesa_receipt_number: string;
+      transaction_type: string;
+      created_at: string;
+    }>)?.[0];
 
     const certData: CertificateData = {
       memberNumber:   member.member_number,
@@ -68,32 +75,44 @@ export async function POST(req: NextRequest) {
     // ── 2. Generate HTML ──────────────────────────────────────────────────────
     const html = generateCertificateHTML(certData);
 
-    // ── 3. Render to PDF using puppeteer ─────────────────────────────────────
-    // Dynamic import so it only loads server-side
-    const puppeteer = await import("puppeteer-core");
-    const chromium  = await import("@sparticuz/chromium");
+    // ── 3. Render PDF ─────────────────────────────────────────────────────────
+    let pdfBuffer: Buffer;
 
-    const browser = await puppeteer.default.launch({
-      args:            chromium.default.args,
-      defaultViewport: chromium.default.defaultViewport,
-      executablePath:  await chromium.default.executablePath(),
-      headless:        true,
-    });
+    try {
+      const executablePath = await chromium.executablePath();
 
-    const page = await browser.newPage();
-    await page.setContent(html, { waitUntil: "networkidle0" });
+      const browser = await puppeteer.launch({
+        args:            chromium.args,
+        defaultViewport: { width: 1122, height: 794 },
+        executablePath,
+        headless:        true,
+      });
 
-    const pdfBuffer = await page.pdf({
-      width:           "1122px",
-      height:          "794px",
-      printBackground: true,
-      margin:          { top: "0", right: "0", bottom: "0", left: "0" },
-    });
+      const page = await browser.newPage();
+      await page.setContent(html, { waitUntil: "load" });
+      await new Promise((r) => setTimeout(r, 1500));
 
-    await browser.close();
+      const pdf = await page.pdf({
+        width:           "1122px",
+        height:          "794px",
+        printBackground: true,
+        margin:          { top: "0", right: "0", bottom: "0", left: "0" },
+      });
 
-    // ── 4. Upload to Supabase Storage ────────────────────────────────────────
-    const fileName = `certificates/UBTA${member.member_number}-${member.full_name.replace(/\s+/g, "-")}.pdf`;
+      await browser.close();
+      pdfBuffer = Buffer.from(pdf);
+
+    } catch (puppeteerErr) {
+      console.error("Puppeteer error:", puppeteerErr);
+      return NextResponse.json(
+        { error: `PDF generation failed: ${puppeteerErr instanceof Error ? puppeteerErr.message : "unknown"}` },
+        { status: 500 }
+      );
+    }
+
+    // ── 4. Upload to Supabase Storage ─────────────────────────────────────────
+    const safeName = member.full_name.replace(/\s+/g, "-").replace(/[^a-zA-Z0-9-]/g, "");
+    const fileName = `certificates/UBTA${member.member_number}-${safeName}.pdf`;
 
     const { error: uploadError } = await supabase.storage
       .from("certificates")
@@ -104,37 +123,41 @@ export async function POST(req: NextRequest) {
 
     if (uploadError) {
       console.error("Storage upload error:", uploadError.message);
+      return NextResponse.json(
+        { error: `Storage upload failed: ${uploadError.message}` },
+        { status: 500 }
+      );
     }
 
-    // ── 5. Get public URL ─────────────────────────────────────────────────────
+    // ── 5. Get public URL ──────────────────────────────────────────────────────
     const { data: urlData } = supabase.storage
       .from("certificates")
       .getPublicUrl(fileName);
 
     const certificateUrl = urlData?.publicUrl ?? null;
 
-    // ── 6. Update member status to verified ──────────────────────────────────
+    // ── 6. Update profile ─────────────────────────────────────────────────────
     await supabase
       .from("profiles")
-      .update({ status: "verified" })
+      .update({ status: "verified", certificate_url: certificateUrl })
       .eq("id", memberId);
 
-    // ── 7. Build WhatsApp message link ───────────────────────────────────────
+    // ── 7. WhatsApp link ──────────────────────────────────────────────────────
+    const phone = member.phone_number.startsWith("254")
+      ? member.phone_number
+      : "254" + member.phone_number.replace(/^0/, "");
+
     const waMessage = encodeURIComponent(
       `Hello ${member.full_name},\n\n` +
-      `Congratulations! Your UBTA membership has been confirmed.\n\n` +
+      `Congratulations! Your UBTA membership has been confirmed. 🏍️\n\n` +
       `*Member ID:* UBTA${member.member_number}\n` +
-      `*Membership Type:* ${certData.membershipType.replace(/_/g, " ")}\n` +
       `*M-Pesa Receipt:* ${certData.mpesaReceipt}\n\n` +
-      `Your membership certificate is ready:\n${certificateUrl ?? "Contact office for certificate"}\n\n` +
-      `Welcome to the UBTA family! 🏍️\n` +
+      `Your membership certificate:\n${certificateUrl}\n\n` +
+      `Welcome to the UBTA family!\n` +
       `Stronger Together · Safer Together · Growing Together`
     );
 
-    const phone    = member.phone_number.startsWith("254")
-      ? member.phone_number
-      : "254" + member.phone_number.replace(/^0/, "");
-    const waLink   = `https://wa.me/${phone}?text=${waMessage}`;
+    const waLink = `https://wa.me/${phone}?text=${waMessage}`;
 
     return NextResponse.json({
       success:        true,
