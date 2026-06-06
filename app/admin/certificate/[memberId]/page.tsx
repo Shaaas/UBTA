@@ -11,7 +11,7 @@ export default async function CertificatePage({
     process.env.SUPABASE_SERVICE_ROLE_KEY!
   );
 
-  const { data: member } = await supabase
+  const { data: member, error } = await supabase
     .from("profiles")
     .select(`
       id, member_number, full_name, phone_number, id_number,
@@ -21,10 +21,17 @@ export default async function CertificatePage({
     .eq("id", params.memberId)
     .single();
 
-  if (!member) {
+  if (error || !member) {
     return (
       <div style={{ fontFamily: "sans-serif", padding: 40, color: "#fff", background: "#0B1220", minHeight: "100vh" }}>
-        Member not found.
+        <p style={{ color: "#f87171", fontWeight: "bold" }}>Error loading certificate</p>
+        <p style={{ color: "#94a3b8", marginTop: 8, fontSize: 14 }}>Member ID: {params.memberId}</p>
+        <p style={{ color: "#94a3b8", marginTop: 4, fontSize: 14 }}>
+          Error: {error?.message ?? "Member not found"}
+        </p>
+        <p style={{ color: "#94a3b8", marginTop: 4, fontSize: 14 }}>
+          Code: {error?.code ?? "—"}
+        </p>
       </div>
     );
   }
@@ -52,7 +59,6 @@ export default async function CertificatePage({
         }
       `}</style>
 
-      {/* Auto-trigger print if ?print=true */}
       <script dangerouslySetInnerHTML={{ __html: `
         if (window.location.search.includes('print=true')) {
           window.onload = function() {
