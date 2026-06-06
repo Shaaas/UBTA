@@ -1,8 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 import { jwtVerify } from "jose";
-import chromium from "@sparticuz/chromium";
-import puppeteer from "puppeteer-core";
 import { generateCertificateHTML, CertificateData } from "../../../../lib/certificate-template";
 
 const supabase = createClient(
@@ -79,10 +77,17 @@ export async function POST(req: NextRequest) {
     let pdfBuffer: Buffer;
 
     try {
-      const executablePath = await chromium.executablePath();
+      // Use @sparticuz/chromium-min which downloads binary at runtime
+      // This avoids the bundler binary path issue on Vercel
+      const chromium = await import("@sparticuz/chromium");
+      const { launch } = await import("puppeteer-core") as { launch: Function };
 
-      const browser = await puppeteer.launch({
-        args:            chromium.args,
+      const executablePath = await chromium.default.executablePath(
+        "https://github.com/Sparticuz/chromium/releases/download/v121.0.0/chromium-v121.0.0-pack.tar"
+      );
+
+      const browser = await launch({
+        args:            chromium.default.args,
         defaultViewport: { width: 1122, height: 794 },
         executablePath,
         headless:        true,
@@ -105,7 +110,7 @@ export async function POST(req: NextRequest) {
     } catch (puppeteerErr) {
       console.error("Puppeteer error:", puppeteerErr);
       return NextResponse.json(
-        { error: `PDF generation failed: ${puppeteerErr instanceof Error ? puppeteerErr.message : "unknown"}` },
+        { error: `PDF generation failed: ${puppeteerErr instanceof Error ? puppeteerErr.message : String(puppeteerErr)}` },
         { status: 500 }
       );
     }
