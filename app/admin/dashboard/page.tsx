@@ -189,7 +189,6 @@ function MemberModal({ member, isChairman, onClose, onSave, onVerified }: {
     setIssuing(true);
     setCertError(null);
     try {
-      // Step 1: verify payment
       const verifyRes = await fetch("/api/admin/verify-member", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -204,7 +203,6 @@ function MemberModal({ member, isChairman, onClose, onSave, onVerified }: {
         throw new Error(d.error ?? "Verification failed");
       }
 
-      // Step 2: get WhatsApp link from certificate API
       const certRes  = await fetch("/api/admin/certificate", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -213,13 +211,11 @@ function MemberModal({ member, isChairman, onClose, onSave, onVerified }: {
       const certData = await certRes.json();
       if (!certRes.ok) throw new Error(certData.error ?? "Certificate generation failed");
 
-      // Step 3: open certificate page — auto-triggers print/save dialog
       window.open(
         `${window.location.origin}/admin/certificate/${member.id}?print=true`,
         "_blank"
       );
 
-      // Step 4: open WhatsApp after short delay
       setTimeout(() => {
         window.open(certData.whatsappLink, "_blank");
       }, 2000);
@@ -236,6 +232,15 @@ function MemberModal({ member, isChairman, onClose, onSave, onVerified }: {
       setIssuing(false);
     }
   };
+
+  const openCertificate = () => {
+    window.open(
+      `${window.location.origin}/admin/certificate/${member.id}?print=true`,
+      "_blank"
+    );
+  };
+
+  const isVerified = member.status === "verified";
 
   const InlineField = ({ label, field, type = "text" }: {
     label: string; field: keyof typeof form; type?: string;
@@ -262,8 +267,6 @@ function MemberModal({ member, isChairman, onClose, onSave, onVerified }: {
       )}
     </div>
   );
-
-  const isVerified = member.status === "verified";
 
   return (
     <div className="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-start justify-center p-4 overflow-y-auto">
@@ -330,13 +333,27 @@ function MemberModal({ member, isChairman, onClose, onSave, onVerified }: {
 
         {/* Certificate issuance panel */}
         {!editing && (
-          <div className="mx-6 mt-5">
-            {isVerified && !certResult ? (
-              <div className="flex items-center gap-2 bg-green-500/10 border border-green-500/30
-                              text-green-400 text-xs rounded-xl px-4 py-3">
-                <Check size={14} /> Member verified — certificate already issued
-              </div>
-            ) : certResult ? (
+          <div className="mx-6 mt-5 space-y-3">
+
+            {/* Already verified — show re-issue + whatsapp if certResult available */}
+            {isVerified && !certResult && (
+              <>
+                <div className="flex items-center gap-2 bg-green-500/10 border border-green-500/30
+                                text-green-400 text-xs rounded-xl px-4 py-3">
+                  <Check size={14} /> Member verified — certificate previously issued
+                </div>
+                <button
+                  onClick={openCertificate}
+                  className="w-full flex items-center justify-center gap-2 bg-orange-500/10 border border-orange-500/30
+                             hover:bg-orange-500/20 text-orange-400 font-bold text-sm uppercase tracking-wide
+                             py-3.5 rounded-xl transition-all">
+                  <ShieldCheck size={14} /> Re-issue Certificate
+                </button>
+              </>
+            )}
+
+            {/* Just issued this session */}
+            {certResult && (
               <div className="bg-green-500/10 border border-green-500/30 rounded-xl p-4 space-y-3">
                 <p className="text-green-400 text-xs font-bold uppercase tracking-wider">
                   ✓ Certificate opened — WhatsApp ready
@@ -344,17 +361,29 @@ function MemberModal({ member, isChairman, onClose, onSave, onVerified }: {
                 <p className="text-slate-400 text-xs">
                   Save the certificate as PDF from the print dialog, then send the WhatsApp message to the member.
                 </p>
-                <a href={certResult.whatsappLink} target="_blank" rel="noopener noreferrer"
-                  className="flex items-center justify-center gap-2 w-full bg-green-600 hover:bg-green-700
-                             text-white font-bold text-xs uppercase tracking-wide py-3 rounded-xl transition-all">
-                  <Phone size={14} /> Re-open WhatsApp
-                </a>
+                <div className="flex gap-2">
+                  <button
+                    onClick={openCertificate}
+                    className="flex-1 flex items-center justify-center gap-2 bg-orange-500/10 border border-orange-500/30
+                               hover:bg-orange-500/20 text-orange-400 font-bold text-xs uppercase tracking-wide
+                               py-3 rounded-xl transition-all">
+                    <ShieldCheck size={14} /> Re-issue Certificate
+                  </button>
+                  <a href={certResult.whatsappLink} target="_blank" rel="noopener noreferrer"
+                    className="flex-1 flex items-center justify-center gap-2 bg-green-600 hover:bg-green-700
+                               text-white font-bold text-xs uppercase tracking-wide py-3 rounded-xl transition-all">
+                    <Phone size={14} /> Re-open WhatsApp
+                  </a>
+                </div>
               </div>
-            ) : (
+            )}
+
+            {/* Pending — first time issue */}
+            {!isVerified && !certResult && (
               <>
                 {certError && (
                   <div className="flex items-center gap-2 bg-red-500/10 border border-red-500/30
-                                  text-red-400 text-xs rounded-xl px-4 py-3 mb-3">
+                                  text-red-400 text-xs rounded-xl px-4 py-3">
                     <AlertCircle size={14} /> {certError}
                   </div>
                 )}
