@@ -72,16 +72,14 @@ export async function POST(req: NextRequest) {
     // Dynamic import so it only loads server-side
     const puppeteer = await import("puppeteer-core");
     const chromium  = await import("@sparticuz/chromium");
-
-    const browser = await puppeteer.default.launch({
-      args:            chromium.default.args,
-      defaultViewport: chromium.default.defaultViewport,
-      executablePath:  await chromium.default.executablePath(),
-      headless:        true,
-    });
+const browser = await puppeteer.default.launch({
+  args:           chromium.default.args,
+  executablePath: await chromium.default.executablePath(),
+  headless:       true,
+});
 
     const page = await browser.newPage();
-    await page.setContent(html, { waitUntil: "networkidle0" });
+    await page.setContent(html, { waitUntil: "networkidle0" as "load" });
 
     const pdfBuffer = await page.pdf({
       width:           "1122px",
