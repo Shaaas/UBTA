@@ -204,7 +204,7 @@ function MemberModal({ member, isChairman, onClose, onSave, onVerified }: {
         throw new Error(d.error ?? "Verification failed");
       }
 
-      // Step 2: generate certificate + WhatsApp link
+      // Step 2: get WhatsApp link from certificate API
       const certRes  = await fetch("/api/admin/certificate", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -213,17 +213,56 @@ function MemberModal({ member, isChairman, onClose, onSave, onVerified }: {
       const certData = await certRes.json();
       if (!certRes.ok) throw new Error(certData.error ?? "Certificate generation failed");
 
+      // Step 3: generate PDF client-side using html2pdf loaded from CDN
+      const baseUrl = window.location.origin;
+      const certPageRes = await fetch(`${baseUrl}/admin/certificate/${member.id}`);
+      const certHTML    = await certPageRes.text();
+
+      const parser  = new DOMParser();
+      const doc     = parser.parseFromString(certHTML, "text/html");
+      const certDiv = doc.body;
+
+      // @ts-expect-error html2pdf loaded via CDN onto window
+      const html2pdf = window.html2pdf;
+      if (html2pdf) {
+        await html2pdf()
+          .set({
+            margin:      0,
+            filename:    `UBTA${member.member_number}-${member.full_name.replace(/\s+/g, "-")}.pdf`,
+            image:       { type: "jpeg", quality: 0.98 },
+            html2canvas: { scale: 2, useCORS: true, logging: false },
+            jsPDF:       { unit: "px", format: [1122, 794], orientation: "landscape" },
+          })
+          .from(certDiv)
+          .save();
+      }
+
+      // Step 4: open WhatsApp after short delay
+      setTimeout(() => {
+        window.open(certData.whatsappLink, "_blank");
+      }, 1500);
+
       setCertResult({
         certificateUrl: certData.certificateUrl,
         whatsappLink:   certData.whatsappLink,
       });
       onVerified(member.id);
+
     } catch (e: unknown) {
       setCertError(e instanceof Error ? e.message : "Failed");
     } finally {
       setIssuing(false);
     }
   };
+
+  // Load html2pdf from CDN
+  useEffect(() => {
+    const script    = document.createElement("script");
+    script.src      = "https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js";
+    script.async    = true;
+    document.head.appendChild(script);
+    return () => { document.head.removeChild(script); };
+  }, []);
 
   const InlineField = ({ label, field, type = "text" }: {
     label: string; field: keyof typeof form; type?: string;
@@ -327,18 +366,15 @@ function MemberModal({ member, isChairman, onClose, onSave, onVerified }: {
             ) : certResult ? (
               <div className="bg-green-500/10 border border-green-500/30 rounded-xl p-4 space-y-3">
                 <p className="text-green-400 text-xs font-bold uppercase tracking-wider">
-                  ✓ Certificate issued successfully
+                  ✓ Certificate downloaded — WhatsApp opened
                 </p>
-                {certResult.certificateUrl && (
-                  <a href={certResult.certificateUrl} target="_blank" rel="noopener noreferrer"
-                    className="block text-xs text-blue-400 underline truncate">
-                    {certResult.certificateUrl}
-                  </a>
-                )}
+                <p className="text-slate-400 text-xs">
+                  Attach the downloaded PDF in the WhatsApp chat and send it to the member.
+                </p>
                 <a href={certResult.whatsappLink} target="_blank" rel="noopener noreferrer"
                   className="flex items-center justify-center gap-2 w-full bg-green-600 hover:bg-green-700
                              text-white font-bold text-xs uppercase tracking-wide py-3 rounded-xl transition-all">
-                  <Phone size={14} /> Send via WhatsApp
+                  <Phone size={14} /> Re-open WhatsApp
                 </a>
               </div>
             ) : (
@@ -601,7 +637,6 @@ export default function AdminDashboard() {
     setEditMember(null);
   };
 
-  // Called after certificate is issued — flips status in local state immediately
   const handleVerified = (id: string) => {
     setMembers((prev) =>
       prev.map((m) => m.id === id ? { ...m, status: "verified" } : m)
