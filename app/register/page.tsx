@@ -306,6 +306,7 @@ export default function RegisterPage() {
   const [submitted,  setSubmitted]  = useState(false);
   const [error,      setError]      = useState<string | null>(null);
   const [successMsg, setSuccessMsg] = useState<string | null>(null);
+  const [mpesaReceipt,  setMpesaReceipt]  = useState("");  
 
   // Derived
   const subCountyOpts = form.county ? (SUB_COUNTIES[form.county] ?? []) : [];
@@ -750,58 +751,57 @@ export default function RegisterPage() {
     );
   }
 
-  // ── Step: PAYMENT ──────────────────────────────────────────────────────────
+  // ── Step: PAYMENT (Manual M-Pesa receipt submission) ──────────────────────
 
   if (step === "payment") {
     const isAffiliate = registrantType === "sacco_affiliate";
-    const payPhone = isAffiliate ? affForm.phone : form.phone;
-    const payName  = isAffiliate ? affForm.contactPerson : form.fullName;
-    const fees     = isAffiliate
+    const payPhone    = isAffiliate ? affForm.phone : form.phone;
+    const payName     = isAffiliate ? affForm.contactPerson : form.fullName;
+    const fees        = isAffiliate
       ? [{ label: "Affiliate Application Processing Fee", amount: 5000 }]
       : getFees(membership);
     const total = fees.reduce((s, f) => s + f.amount, 0);
 
-    const handlePayment = async (e: React.FormEvent) => {
+
+    const handleSubmit = async (e: React.FormEvent) => {
       e.preventDefault();
       setError(null);
-      setSuccessMsg(null);
+      if (!mpesaReceipt.trim()) {
+        setError("Please enter your M-Pesa receipt code.");
+        return;
+      }
       setSubmitting(true);
       try {
-        const res = await fetch("/api/stk-push", {
+        const res = await fetch("/api/register", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
-              // Payment
-              phone:          payPhone,
-              amount:         total,
-              membershipType: isAffiliate ? "affiliate" : membership,
-
-              // Profile fields — individual
-              fullName:       isAffiliate ? affForm.contactPerson : form.fullName,
-              idNumber:       isAffiliate ? "" : form.idNumber,
-              bikeRegistration: isAffiliate ? "" : form.plateNumber,
-              county:         isAffiliate ? affForm.county : form.county,
-              subCounty:      isAffiliate ? affForm.subCounty : form.subCounty,
-              stageNode:      isAffiliate ? "" : form.stageNode,
-              customStageNode: (!isAffiliate && form.stageNode === "Other / Not Listed")
-                                 ? form.stageNode : null,
-              dateOfBirth:    isAffiliate ? null : form.dob,
-              kraPin:         isAffiliate ? affForm.kraPin : form.kraPin,
-              kinName:        isAffiliate ? null : form.kinName,
-              kinPhone:       isAffiliate ? null : form.kinPhone,
-              kinRelationship: isAffiliate ? null : form.kinRelationship,
-            }),
+            mpesaReceipt:     mpesaReceipt.trim().toUpperCase(),
+            amount:           total,
+            membershipType:   isAffiliate ? "affiliate" : membership,
+            fullName:         isAffiliate ? affForm.contactPerson : form.fullName,
+            phone:            payPhone,
+            idNumber:         isAffiliate ? "" : form.idNumber,
+            bikeRegistration: isAffiliate ? "" : form.plateNumber,
+            county:           isAffiliate ? affForm.county : form.county,
+            subCounty:        isAffiliate ? affForm.subCounty : form.subCounty,
+            stageNode:        isAffiliate ? "" : form.stageNode,
+            dateOfBirth:      isAffiliate ? null : form.dob,
+            kraPin:           isAffiliate ? affForm.kraPin : form.kraPin,
+            emailAddress:     isAffiliate ? affForm.email : "",
+            kinName:          isAffiliate ? null : form.kinName,
+            kinPhone:         isAffiliate ? null : form.kinPhone,
+            kinRelationship:  isAffiliate ? null : form.kinRelationship,
+          }),
         });
         const data = await res.json();
         if (res.ok) {
-          setSuccessMsg("STK Push initiated! Check your phone for the M-Pesa prompt and enter your PIN to complete payment.");
-          await new Promise((r) => setTimeout(r, 4000));
           setSubmitted(true);
         } else {
-          setError(data.error || "M-Pesa gateway rejected this request.");
+          setError(data.error || "Submission failed. Please try again.");
         }
       } catch {
-        setError("A network error occurred during payment dispatch.");
+        setError("A network error occurred. Please try again.");
       } finally {
         setSubmitting(false);
       }
@@ -816,14 +816,17 @@ export default function RegisterPage() {
             </div>
             <h1 className="font-bold text-white text-3xl uppercase mb-4">Application Submitted!</h1>
             <p className="text-slate-400 leading-relaxed mb-2">
-              Thank you, <strong className="text-white">{payName}</strong>. Your application and payment have been received.
+              Thank you, <strong className="text-white">{payName}</strong>. Your application has been received and is pending verification.
             </p>
-            <p className="text-slate-500 text-sm mb-8">
-              Our team will review your details and contact you at <strong className="text-slate-300">{payPhone}</strong>.
+            <p className="text-slate-500 text-sm mb-3">
+              Our team will verify your M-Pesa payment and issue your membership certificate. You will be contacted at <strong className="text-slate-300">{payPhone}</strong>.
+            </p>
+            <p className="text-slate-600 text-xs mb-8">
+              Verification typically takes 1–2 business hours during working hours (Mon–Sat, 8am–6pm).
             </p>
             <div className="space-y-3">
               <a
-                href={`https://wa.me/254714314342?text=Hello%20UBTA,%20I%20just%20submitted%20my%20registration.%20My%20name%20is%20${encodeURIComponent(payName)}`}
+                href={`https://wa.me/254714314342?text=Hello%20UBTA,%20I%20just%20submitted%20my%20membership%20application.%20My%20name%20is%20${encodeURIComponent(payName)}%20and%20my%20M-Pesa%20receipt%20is%20${encodeURIComponent(mpesaReceipt)}`}
                 target="_blank" rel="noopener noreferrer"
                 className="w-full justify-center inline-flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white font-bold px-6 py-3.5 rounded-xl transition-all"
               >
@@ -842,21 +845,45 @@ export default function RegisterPage() {
       <PageShell>
         <PageHeader
           badge={isAffiliate ? "Step 3 of 3 — Payment" : "Step 4 of 4 — Payment"}
-          title={<>M-Pesa <span className="text-green-400">Checkout</span></>}
-          subtitle="Confirm your details and authorise payment via M-Pesa STK push."
+          title={<>Confirm <span className="text-green-400">Payment</span></>}
+          subtitle="Pay via M-Pesa paybill, then enter your receipt code below to complete your application."
           progress={<ProgressBar steps={isAffiliate ? AFFILIATE_STEPS : INDIVIDUAL_STEPS} current={isAffiliate ? 2 : 3} />}
         />
         <div className="max-w-xl mx-auto px-4 sm:px-6 py-10">
           <BackButton onClick={() => setStep("form")} />
 
           {error && <ErrorBanner msg={error} />}
-          {successMsg && (
-            <div className="flex items-start gap-3 bg-emerald-500/10 border border-emerald-500/30 rounded-xl p-4 text-sm text-emerald-400 mb-6 animate-pulse">
-              <CheckCircle size={16} className="shrink-0 mt-0.5" /> {successMsg}
-            </div>
-          )}
 
-          <form onSubmit={handlePayment} className="mt-5 bg-slate-900/40 border border-slate-800 rounded-2xl p-6 space-y-6">
+          {/* Payment instructions */}
+          <div className="mt-5 bg-emerald-500/10 border border-emerald-500/30 rounded-2xl p-5 mb-5">
+            <p className="text-emerald-400 text-xs font-black uppercase tracking-widest mb-3">
+              How to pay via M-Pesa
+            </p>
+            <ol className="space-y-2 text-slate-300 text-sm">
+              <li className="flex items-start gap-2">
+                <span className="w-5 h-5 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center text-[10px] font-black shrink-0 mt-0.5">1</span>
+                Go to <strong className="text-white">M-Pesa → Lipa Na M-Pesa → Pay Bill</strong>
+              </li>
+              <li className="flex items-start gap-2">
+                <span className="w-5 h-5 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center text-[10px] font-black shrink-0 mt-0.5">2</span>
+                Business No: <strong className="text-white font-mono">4146697</strong>
+              </li>
+              <li className="flex items-start gap-2">
+                <span className="w-5 h-5 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center text-[10px] font-black shrink-0 mt-0.5">3</span>
+                Account No: <strong className="text-white">{payName}</strong> (your full name)
+              </li>
+              <li className="flex items-start gap-2">
+                <span className="w-5 h-5 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center text-[10px] font-black shrink-0 mt-0.5">4</span>
+                Amount: <strong className="text-white font-mono">Ksh {total.toLocaleString()}</strong>
+              </li>
+              <li className="flex items-start gap-2">
+                <span className="w-5 h-5 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center text-[10px] font-black shrink-0 mt-0.5">5</span>
+                Enter your PIN and complete payment, then copy the <strong className="text-white">receipt code</strong> from the confirmation SMS
+              </li>
+            </ol>
+          </div>
+
+          <form onSubmit={handleSubmit} className="bg-slate-900/40 border border-slate-800 rounded-2xl p-6 space-y-6">
 
             {/* Header */}
             <div className="flex items-center gap-3 pb-4 border-b border-slate-800">
@@ -864,8 +891,8 @@ export default function RegisterPage() {
                 <CreditCard size={18} />
               </div>
               <div>
-                <h2 className="font-bold text-white text-lg uppercase tracking-wide">Lipa Na M-Pesa</h2>
-                <p className="text-slate-500 text-xs mt-0.5">Secure payment via STK push</p>
+                <h2 className="font-bold text-white text-lg uppercase tracking-wide">Confirm Your Payment</h2>
+                <p className="text-slate-500 text-xs mt-0.5">Enter the receipt code from your M-Pesa SMS</p>
               </div>
             </div>
 
@@ -901,22 +928,29 @@ export default function RegisterPage() {
               </div>
             </div>
 
-            {/* Phone */}
+            {/* Receipt code */}
             <div>
               <label className="block text-[11px] font-bold text-slate-400 uppercase tracking-widest mb-2">
-                M-Pesa Phone Number
+                M-Pesa Receipt Code <span className="text-orange-500">*</span>
               </label>
               <div className="relative">
-                <div className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-500"><Phone size={15} /></div>
+                <div className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-500">
+                  <FileText size={15} />
+                </div>
                 <input
-                  type="tel" value={payPhone}
-                  onChange={(e) => isAffiliate ? updateAff("phone", e.target.value) : updateForm("phone", e.target.value)}
+                  type="text"
+                  value={mpesaReceipt}
+                  onChange={(e) => setMpesaReceipt(e.target.value.toUpperCase())}
+                  placeholder="e.g. RCX1A2B3C4D"
                   required
                   className="w-full bg-slate-950/60 border border-slate-800 rounded-xl pl-10 pr-4 py-3.5
-                             text-white text-sm font-mono focus:outline-none focus:border-orange-500/60 transition-all"
+                             text-white text-sm font-mono tracking-wider placeholder:text-slate-600
+                             focus:outline-none focus:border-orange-500/60 transition-all"
                 />
               </div>
-              <p className="mt-1.5 text-[11px] text-slate-500">The STK push will be sent to this number.</p>
+              <p className="mt-1.5 text-[11px] text-slate-500">
+                Found in the M-Pesa confirmation SMS after payment e.g. <span className="font-mono text-slate-400">RCX1A2B3C4D confirmed</span>
+              </p>
             </div>
 
             <div className="flex gap-3">
@@ -930,9 +964,9 @@ export default function RegisterPage() {
                            text-white font-bold uppercase tracking-wide py-3.5 rounded-xl transition-all
                            flex items-center justify-center gap-2 text-sm shadow-lg shadow-emerald-600/10">
                 {submitting ? (
-                  <><span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" /> Processing...</>
+                  <><span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" /> Submitting...</>
                 ) : (
-                  <>Authorize Ksh {total.toLocaleString()} via M-Pesa</>
+                  <><CheckCircle size={15} /> Submit Application</>
                 )}
               </button>
             </div>

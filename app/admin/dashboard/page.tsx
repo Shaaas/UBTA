@@ -3,9 +3,9 @@
 import { useState, useEffect, useCallback } from "react";
 import {
   Users, Search, LogOut, Edit2, X, Check,
-  ChevronLeft, ChevronRight, Phone, CreditCard,
-  MapPin, Bike, Calendar, User, Shield,
-  TrendingUp, RefreshCw, Eye, AlertCircle,
+  ChevronLeft, ChevronRight, CreditCard,
+  MapPin, TrendingUp, RefreshCw, Eye, AlertCircle,
+  Shield, Phone, ShieldCheck,
 } from "lucide-react";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -14,6 +14,7 @@ interface Transaction {
   mpesa_receipt_number: string;
   amount: number;
   transaction_type: string;
+  payment_status: string;
   created_at: string;
 }
 
@@ -34,6 +35,7 @@ interface Member {
   next_of_kin_relationship: string | null;
   welfare_balance: number;
   sacco_balance: number;
+  status: "pending" | "verified" | null;
   created_at: string;
   transactions: Transaction[];
 }
@@ -42,6 +44,11 @@ interface AdminInfo {
   name: string;
   role: "chairman" | "secretary";
   email: string;
+}
+
+interface CertResult {
+  certificateUrl: string | null;
+  whatsappLink: string;
 }
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
@@ -95,23 +102,21 @@ function MemberRow({
       </td>
       <td className="px-4 py-3.5 text-gray-400 text-sm font-mono">{member.id_number}</td>
       <td className="px-4 py-3.5 text-gray-400 text-xs">{member.working_county}</td>
-      <td className="px-4 py-3.5 text-gray-400 text-xs font-mono uppercase">{member.bike_registration_number}</td>
+      <td className="px-4 py-3.5 text-gray-400 text-xs font-mono uppercase">
+        {member.bike_registration_number}
+      </td>
       <td className="px-4 py-3.5">
-        {latestTx ? (
-          <div>
-            <span className={`text-xs font-bold px-2 py-0.5 rounded-md ${
-              latestTx.transaction_type.includes("paid")
-                ? "bg-green-500/10 text-green-400"
-                : latestTx.transaction_type.includes("failed")
-                ? "bg-red-500/10 text-red-400"
-                : "bg-orange-500/10 text-orange-400"
-            }`}>
-              {latestTx.transaction_type.replace(/_/g, " ")}
-            </span>
-            <div className="text-gray-600 text-[10px] mt-1">{latestTx.mpesa_receipt_number}</div>
+        <span className={`text-xs font-bold px-2 py-0.5 rounded-md ${
+          member.status === "verified"
+            ? "bg-green-500/10 text-green-400"
+            : "bg-amber-500/10 text-amber-400"
+        }`}>
+          {member.status === "verified" ? "Verified" : "Pending"}
+        </span>
+        {latestTx && (
+          <div className="text-gray-600 text-[10px] mt-1 font-mono">
+            {latestTx.mpesa_receipt_number}
           </div>
-        ) : (
-          <span className="text-gray-600 text-xs">No transaction</span>
         )}
       </td>
       <td className="px-4 py-3.5 text-gray-400 text-xs">{fmt(member.created_at)}</td>
@@ -135,15 +140,22 @@ function MemberRow({
   );
 }
 
-function MemberModal({ member, isChairman, onClose, onSave }: {
+// ─── Member modal ─────────────────────────────────────────────────────────────
+
+function MemberModal({ member, isChairman, onClose, onSave, onVerified }: {
   member: Member;
   isChairman: boolean;
   onClose: () => void;
   onSave: (id: string, updates: Partial<Member>) => Promise<void>;
+  onVerified: (id: string) => void;
 }) {
-  const [editing, setEditing] = useState(false);
-  const [saving,  setSaving]  = useState(false);
-  const [error,   setError]   = useState<string | null>(null);
+  const [editing,    setEditing]    = useState(false);
+  const [saving,     setSaving]     = useState(false);
+  const [issuing,    setIssuing]    = useState(false);
+  const [certResult, setCertResult] = useState<CertResult | null>(null);
+  const [error,      setError]      = useState<string | null>(null);
+  const [certError,  setCertError]  = useState<string | null>(null);
+
   const [form, setForm] = useState({
     full_name:                  member.full_name,
     phone_number:               member.phone_number,
@@ -173,7 +185,47 @@ function MemberModal({ member, isChairman, onClose, onSave }: {
     }
   };
 
-  const Field = ({ label, field, type = "text" }: {
+  const handleIssue = async () => {
+    setIssuing(true);
+    setCertError(null);
+    try {
+      // Step 1: verify payment
+      const verifyRes = await fetch("/api/admin/verify-member", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          memberId:     member.id,
+          mpesaReceipt: member.transactions?.[0]?.mpesa_receipt_number ?? "",
+          amount:       member.transactions?.[0]?.amount ?? 0,
+        }),
+      });
+      if (!verifyRes.ok) {
+        const d = await verifyRes.json();
+        throw new Error(d.error ?? "Verification failed");
+      }
+
+      // Step 2: generate certificate + WhatsApp link
+      const certRes  = await fetch("/api/admin/certificate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ memberId: member.id }),
+      });
+      const certData = await certRes.json();
+      if (!certRes.ok) throw new Error(certData.error ?? "Certificate generation failed");
+
+      setCertResult({
+        certificateUrl: certData.certificateUrl,
+        whatsappLink:   certData.whatsappLink,
+      });
+      onVerified(member.id);
+    } catch (e: unknown) {
+      setCertError(e instanceof Error ? e.message : "Failed");
+    } finally {
+      setIssuing(false);
+    }
+  };
+
+  const InlineField = ({ label, field, type = "text" }: {
     label: string; field: keyof typeof form; type?: string;
   }) => (
     <div>
@@ -184,7 +236,10 @@ function MemberModal({ member, isChairman, onClose, onSave }: {
         <input
           type={type}
           value={form[field] as string}
-          onChange={(e) => setForm((p) => ({ ...p, [field]: type === "number" ? Number(e.target.value) : e.target.value }))}
+          onChange={(e) => setForm((p) => ({
+            ...p,
+            [field]: type === "number" ? Number(e.target.value) : e.target.value,
+          }))}
           className="w-full bg-[#0B0F19] border border-gray-700 rounded-lg px-3 py-2.5 text-white text-sm
                      focus:outline-none focus:border-orange-500/60 transition-all"
         />
@@ -195,6 +250,8 @@ function MemberModal({ member, isChairman, onClose, onSave }: {
       )}
     </div>
   );
+
+  const isVerified = member.status === "verified";
 
   return (
     <div className="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-start justify-center p-4 overflow-y-auto">
@@ -210,6 +267,13 @@ function MemberModal({ member, isChairman, onClose, onSave }: {
               <h2 className="font-black text-white text-lg uppercase tracking-tight">
                 {member.full_name}
               </h2>
+              <span className={`text-[10px] font-bold px-2 py-0.5 rounded-md ${
+                isVerified
+                  ? "bg-green-500/10 text-green-400"
+                  : "bg-amber-500/10 text-amber-400"
+              }`}>
+                {isVerified ? "Verified" : "Pending"}
+              </span>
             </div>
             <p className="text-gray-500 text-xs mt-1">Registered {fmt(member.created_at)}</p>
           </div>
@@ -226,11 +290,13 @@ function MemberModal({ member, isChairman, onClose, onSave }: {
                 <button onClick={handleSave} disabled={saving}
                   className="flex items-center gap-1.5 px-3 py-2 bg-green-500/10 border border-green-500/30
                              text-green-400 text-xs font-bold rounded-lg hover:bg-green-500/20 transition-all disabled:opacity-50">
-                  {saving ? <RefreshCw size={13} className="animate-spin" /> : <Check size={13} />}
-                  {saving ? "Saving..." : "Save"}
+                  {saving
+                    ? <><RefreshCw size={13} className="animate-spin" /> Saving...</>
+                    : <><Check size={13} /> Save</>}
                 </button>
                 <button onClick={() => { setEditing(false); setError(null); }}
-                  className="flex items-center gap-1.5 px-3 py-2 bg-gray-800 text-gray-400 text-xs font-bold rounded-lg hover:bg-gray-700 transition-all">
+                  className="flex items-center gap-1.5 px-3 py-2 bg-gray-800 text-gray-400
+                             text-xs font-bold rounded-lg hover:bg-gray-700 transition-all">
                   <X size={13} /> Cancel
                 </button>
               </>
@@ -242,9 +308,61 @@ function MemberModal({ member, isChairman, onClose, onSave }: {
           </div>
         </div>
 
+        {/* General error */}
         {error && (
-          <div className="mx-6 mt-4 flex items-center gap-2 bg-red-500/10 border border-red-500/30 text-red-400 text-xs rounded-xl px-4 py-3">
+          <div className="mx-6 mt-4 flex items-center gap-2 bg-red-500/10 border border-red-500/30
+                          text-red-400 text-xs rounded-xl px-4 py-3">
             <AlertCircle size={14} /> {error}
+          </div>
+        )}
+
+        {/* Certificate issuance panel */}
+        {!editing && (
+          <div className="mx-6 mt-5">
+            {isVerified && !certResult ? (
+              <div className="flex items-center gap-2 bg-green-500/10 border border-green-500/30
+                              text-green-400 text-xs rounded-xl px-4 py-3">
+                <Check size={14} /> Member verified — certificate already issued
+              </div>
+            ) : certResult ? (
+              <div className="bg-green-500/10 border border-green-500/30 rounded-xl p-4 space-y-3">
+                <p className="text-green-400 text-xs font-bold uppercase tracking-wider">
+                  ✓ Certificate issued successfully
+                </p>
+                {certResult.certificateUrl && (
+                  <a href={certResult.certificateUrl} target="_blank" rel="noopener noreferrer"
+                    className="block text-xs text-blue-400 underline truncate">
+                    {certResult.certificateUrl}
+                  </a>
+                )}
+                <a href={certResult.whatsappLink} target="_blank" rel="noopener noreferrer"
+                  className="flex items-center justify-center gap-2 w-full bg-green-600 hover:bg-green-700
+                             text-white font-bold text-xs uppercase tracking-wide py-3 rounded-xl transition-all">
+                  <Phone size={14} /> Send via WhatsApp
+                </a>
+              </div>
+            ) : (
+              <>
+                {certError && (
+                  <div className="flex items-center gap-2 bg-red-500/10 border border-red-500/30
+                                  text-red-400 text-xs rounded-xl px-4 py-3 mb-3">
+                    <AlertCircle size={14} /> {certError}
+                  </div>
+                )}
+                <button
+                  onClick={handleIssue}
+                  disabled={issuing}
+                  className="w-full flex items-center justify-center gap-2 bg-orange-500 hover:bg-orange-600
+                             disabled:opacity-60 disabled:cursor-not-allowed text-white font-bold text-sm
+                             uppercase tracking-wide py-3.5 rounded-xl transition-all">
+                  {issuing ? (
+                    <><RefreshCw size={14} className="animate-spin" /> Generating Certificate...</>
+                  ) : (
+                    <><ShieldCheck size={14} /> Verify & Issue Certificate</>
+                  )}
+                </button>
+              </>
+            )}
           </div>
         )}
 
@@ -253,64 +371,83 @@ function MemberModal({ member, isChairman, onClose, onSave }: {
           {/* Balances */}
           <div className="grid grid-cols-2 gap-4">
             <div className="bg-[#0B0F19] border border-gray-800 rounded-xl p-4">
-              <p className="text-gray-500 text-[11px] font-bold uppercase tracking-wider mb-1">Welfare Balance</p>
+              <p className="text-gray-500 text-[11px] font-bold uppercase tracking-wider mb-1">
+                Welfare Balance
+              </p>
               {editing ? (
                 <input type="number" value={form.welfare_balance}
                   onChange={(e) => setForm((p) => ({ ...p, welfare_balance: Number(e.target.value) }))}
                   className="w-full bg-transparent border-b border-gray-700 text-green-400 font-black text-xl
                              focus:outline-none focus:border-orange-500 pb-1" />
               ) : (
-                <p className="text-green-400 font-black text-xl font-mono">{fmtMoney(form.welfare_balance)}</p>
+                <p className="text-green-400 font-black text-xl font-mono">
+                  {fmtMoney(form.welfare_balance)}
+                </p>
               )}
             </div>
             <div className="bg-[#0B0F19] border border-gray-800 rounded-xl p-4">
-              <p className="text-gray-500 text-[11px] font-bold uppercase tracking-wider mb-1">SACCO Balance</p>
+              <p className="text-gray-500 text-[11px] font-bold uppercase tracking-wider mb-1">
+                SACCO Balance
+              </p>
               {editing ? (
                 <input type="number" value={form.sacco_balance}
                   onChange={(e) => setForm((p) => ({ ...p, sacco_balance: Number(e.target.value) }))}
                   className="w-full bg-transparent border-b border-gray-700 text-teal-400 font-black text-xl
                              focus:outline-none focus:border-orange-500 pb-1" />
               ) : (
-                <p className="text-teal-400 font-black text-xl font-mono">{fmtMoney(form.sacco_balance)}</p>
+                <p className="text-teal-400 font-black text-xl font-mono">
+                  {fmtMoney(form.sacco_balance)}
+                </p>
               )}
             </div>
           </div>
 
           {/* Personal details */}
           <div>
-            <p className="text-[11px] font-black text-gray-500 uppercase tracking-widest mb-4">Personal Details</p>
+            <p className="text-[11px] font-black text-gray-500 uppercase tracking-widest mb-4">
+              Personal Details
+            </p>
             <div className="grid sm:grid-cols-2 gap-4">
-              <Field label="Full Name"        field="full_name" />
-              <Field label="Phone Number"     field="phone_number" />
-              <Field label="National ID"      field="id_number" />
-              <Field label="Email Address"    field="email_address" type="email" />
-              <Field label="Bike Plate"       field="bike_registration_number" />
-              <Field label="County"           field="working_county" />
-              <Field label="Sub-County"       field="sub_county" />
-              <Field label="Stage Node"       field="current_operating_location" />
+              <InlineField label="Full Name"     field="full_name" />
+              <InlineField label="Phone Number"  field="phone_number" />
+              <InlineField label="National ID"   field="id_number" />
+              <InlineField label="Email Address" field="email_address" type="email" />
+              <InlineField label="Bike Plate"    field="bike_registration_number" />
+              <InlineField label="County"        field="working_county" />
+              <InlineField label="Sub-County"    field="sub_county" />
+              <InlineField label="Stage Node"    field="current_operating_location" />
             </div>
           </div>
 
           {/* Next of kin */}
           <div>
-            <p className="text-[11px] font-black text-gray-500 uppercase tracking-widest mb-4">Next of Kin</p>
+            <p className="text-[11px] font-black text-gray-500 uppercase tracking-widest mb-4">
+              Next of Kin
+            </p>
             <div className="grid sm:grid-cols-3 gap-4">
-              <Field label="Name"         field="next_of_kin_name" />
-              <Field label="Phone"        field="next_of_kin_contact" />
-              <Field label="Relationship" field="next_of_kin_relationship" />
+              <InlineField label="Name"         field="next_of_kin_name" />
+              <InlineField label="Phone"        field="next_of_kin_contact" />
+              <InlineField label="Relationship" field="next_of_kin_relationship" />
             </div>
           </div>
 
           {/* Transactions */}
           {member.transactions?.length > 0 && (
             <div>
-              <p className="text-[11px] font-black text-gray-500 uppercase tracking-widest mb-4">Payment History</p>
+              <p className="text-[11px] font-black text-gray-500 uppercase tracking-widest mb-4">
+                Payment History
+              </p>
               <div className="space-y-2">
                 {member.transactions.map((tx, i) => (
-                  <div key={i} className="flex items-center justify-between bg-[#0B0F19] border border-gray-800 rounded-xl px-4 py-3">
+                  <div key={i}
+                    className="flex items-center justify-between bg-[#0B0F19] border border-gray-800 rounded-xl px-4 py-3">
                     <div>
-                      <p className="text-white text-xs font-bold">{tx.transaction_type.replace(/_/g, " ")}</p>
-                      <p className="text-gray-500 text-[11px] font-mono mt-0.5">{tx.mpesa_receipt_number}</p>
+                      <p className="text-white text-xs font-bold">
+                        {tx.transaction_type.replace(/_/g, " ")}
+                      </p>
+                      <p className="text-gray-500 text-[11px] font-mono mt-0.5">
+                        {tx.mpesa_receipt_number}
+                      </p>
                     </div>
                     <div className="text-right">
                       <p className="text-orange-400 font-black text-sm">{fmtMoney(tx.amount)}</p>
@@ -363,7 +500,8 @@ function AdminLogin({ onLogin }: { onLogin: (info: AdminInfo) => void }) {
       <div className="w-full max-w-sm">
         <div className="text-center mb-8">
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src="/logo.jpeg" alt="UBTA" className="w-14 h-14 rounded-full mx-auto mb-4 bg-white p-1" />
+          <img src="/logo.jpeg" alt="UBTA"
+            className="w-14 h-14 rounded-full mx-auto mb-4 bg-white p-1" />
           <h1 className="font-black text-white text-2xl uppercase tracking-tight">Admin Portal</h1>
           <p className="text-gray-500 text-xs mt-1">United Boda Transport Association</p>
         </div>
@@ -375,7 +513,8 @@ function AdminLogin({ onLogin }: { onLogin: (info: AdminInfo) => void }) {
           </div>
 
           {error && (
-            <div className="flex items-center gap-2 bg-red-500/10 border border-red-500/30 text-red-400 text-xs rounded-xl px-4 py-3 mb-4">
+            <div className="flex items-center gap-2 bg-red-500/10 border border-red-500/30
+                            text-red-400 text-xs rounded-xl px-4 py-3 mb-4">
               <AlertCircle size={14} /> {error}
             </div>
           )}
@@ -401,7 +540,8 @@ function AdminLogin({ onLogin }: { onLogin: (info: AdminInfo) => void }) {
             </div>
             <button type="submit" disabled={loading}
               className="w-full bg-orange-500 hover:bg-orange-600 disabled:opacity-60 text-white font-bold
-                         uppercase tracking-wide py-3.5 rounded-xl transition-all flex items-center justify-center gap-2 text-sm">
+                         uppercase tracking-wide py-3.5 rounded-xl transition-all
+                         flex items-center justify-center gap-2 text-sm">
               {loading
                 ? <><span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" /> Signing in...</>
                 : <><Shield size={15} /> Sign In</>}
@@ -416,15 +556,15 @@ function AdminLogin({ onLogin }: { onLogin: (info: AdminInfo) => void }) {
 // ─── Main dashboard ───────────────────────────────────────────────────────────
 
 export default function AdminDashboard() {
-  const [admin,        setAdmin]        = useState<AdminInfo | null>(null);
-  const [members,      setMembers]      = useState<Member[]>([]);
-  const [total,        setTotal]        = useState(0);
-  const [page,         setPage]         = useState(1);
-  const [search,       setSearch]       = useState("");
-  const [searchInput,  setSearchInput]  = useState("");
-  const [loading,      setLoading]      = useState(false);
-  const [viewMember,   setViewMember]   = useState<Member | null>(null);
-  const [editMember,   setEditMember]   = useState<Member | null>(null);
+  const [admin,       setAdmin]       = useState<AdminInfo | null>(null);
+  const [members,     setMembers]     = useState<Member[]>([]);
+  const [total,       setTotal]       = useState(0);
+  const [page,        setPage]        = useState(1);
+  const [search,      setSearch]      = useState("");
+  const [searchInput, setSearchInput] = useState("");
+  const [loading,     setLoading]     = useState(false);
+  const [viewMember,  setViewMember]  = useState<Member | null>(null);
+  const [editMember,  setEditMember]  = useState<Member | null>(null);
 
   const isChairman = admin?.role === "chairman";
   const totalPages = Math.ceil(total / 20);
@@ -433,7 +573,9 @@ export default function AdminDashboard() {
     if (!admin) return;
     setLoading(true);
     try {
-      const res  = await fetch(`/api/admin/members?page=${page}&search=${encodeURIComponent(search)}`);
+      const res  = await fetch(
+        `/api/admin/members?page=${page}&search=${encodeURIComponent(search)}`
+      );
       const data = await res.json();
       if (res.ok) {
         setMembers(data.members ?? []);
@@ -457,6 +599,16 @@ export default function AdminDashboard() {
     setMembers((prev) => prev.map((m) => m.id === id ? { ...m, ...updates } : m));
     setViewMember((prev) => prev?.id === id ? { ...prev, ...updates } as Member : prev);
     setEditMember(null);
+  };
+
+  // Called after certificate is issued — flips status in local state immediately
+  const handleVerified = (id: string) => {
+    setMembers((prev) =>
+      prev.map((m) => m.id === id ? { ...m, status: "verified" } : m)
+    );
+    setViewMember((prev) =>
+      prev?.id === id ? { ...prev, status: "verified" } : prev
+    );
   };
 
   const handleLogout = async () => {
@@ -507,18 +659,23 @@ export default function AdminDashboard() {
         {/* Stats */}
         {isChairman && (
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            <StatCard label="Total Members"   value={total}  icon={Users}     color="bg-orange-500/10 text-orange-400" />
-            <StatCard label="Latest Member #" value={members[0]?.member_number ?? "—"} icon={CreditCard} color="bg-teal-500/10 text-teal-400" />
-            <StatCard label="Counties Active" value={[...new Set(members.map((m) => m.working_county))].length} icon={MapPin} color="bg-blue-500/10 text-blue-400" />
-            <StatCard label="Total SACCO Bal" value={fmtMoney(members.reduce((s, m) => s + m.sacco_balance, 0))} icon={TrendingUp} color="bg-green-500/10 text-green-400" />
+            <StatCard label="Total Members"
+              value={total} icon={Users} color="bg-orange-500/10 text-orange-400" />
+            <StatCard label="Latest Member #"
+              value={members[0]?.member_number ?? "—"} icon={CreditCard} color="bg-teal-500/10 text-teal-400" />
+            <StatCard label="Counties Active"
+              value={[...new Set(members.map((m) => m.working_county))].length}
+              icon={MapPin} color="bg-blue-500/10 text-blue-400" />
+            <StatCard label="Total SACCO Bal"
+              value={fmtMoney(members.reduce((s, m) => s + m.sacco_balance, 0))}
+              icon={TrendingUp} color="bg-green-500/10 text-green-400" />
           </div>
         )}
 
         {/* Members table */}
         <div className="bg-[#111827] border border-gray-800 rounded-2xl overflow-hidden">
-
-          {/* Table header */}
-          <div className="p-5 border-b border-gray-800 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+          <div className="p-5 border-b border-gray-800 flex flex-col sm:flex-row
+                          items-start sm:items-center justify-between gap-4">
             <div>
               <h2 className="font-black text-white text-lg uppercase tracking-tight">Members</h2>
               <p className="text-gray-500 text-xs mt-0.5">{total} registered members</p>
@@ -537,7 +694,8 @@ export default function AdminDashboard() {
                   />
                 </div>
                 <button type="submit"
-                  className="px-4 py-2.5 bg-orange-500 hover:bg-orange-600 text-white text-xs font-bold rounded-xl transition-all">
+                  className="px-4 py-2.5 bg-orange-500 hover:bg-orange-600 text-white
+                             text-xs font-bold rounded-xl transition-all">
                   Search
                 </button>
               </form>
@@ -548,13 +706,13 @@ export default function AdminDashboard() {
             </div>
           </div>
 
-          {/* Table */}
           <div className="overflow-x-auto">
             <table className="w-full">
               <thead>
                 <tr className="border-b border-gray-800/60">
                   {["#", "Member", "ID Number", "County", "Plate", "Status", "Joined", ""].map((h) => (
-                    <th key={h} className="px-4 py-3 text-left text-[11px] font-bold text-gray-500 uppercase tracking-widest">
+                    <th key={h}
+                      className="px-4 py-3 text-left text-[11px] font-bold text-gray-500 uppercase tracking-widest">
                       {h}
                     </th>
                   ))}
@@ -589,23 +747,20 @@ export default function AdminDashboard() {
             </table>
           </div>
 
-          {/* Pagination */}
           {totalPages > 1 && (
             <div className="p-4 border-t border-gray-800 flex items-center justify-between">
               <p className="text-gray-500 text-xs">
                 Page {page} of {totalPages} · {total} members
               </p>
               <div className="flex items-center gap-2">
-                <button
-                  onClick={() => setPage((p) => Math.max(1, p - 1))}
-                  disabled={page === 1}
-                  className="p-2 text-gray-500 hover:text-white hover:bg-gray-800 rounded-lg disabled:opacity-30 transition-all">
+                <button onClick={() => setPage((p) => Math.max(1, p - 1))} disabled={page === 1}
+                  className="p-2 text-gray-500 hover:text-white hover:bg-gray-800 rounded-lg
+                             disabled:opacity-30 transition-all">
                   <ChevronLeft size={15} />
                 </button>
-                <button
-                  onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
-                  disabled={page === totalPages}
-                  className="p-2 text-gray-500 hover:text-white hover:bg-gray-800 rounded-lg disabled:opacity-30 transition-all">
+                <button onClick={() => setPage((p) => Math.min(totalPages, p + 1))} disabled={page === totalPages}
+                  className="p-2 text-gray-500 hover:text-white hover:bg-gray-800 rounded-lg
+                             disabled:opacity-30 transition-all">
                   <ChevronRight size={15} />
                 </button>
               </div>
@@ -621,6 +776,7 @@ export default function AdminDashboard() {
           isChairman={isChairman}
           onClose={() => setViewMember(null)}
           onSave={handleSave}
+          onVerified={handleVerified}
         />
       )}
       {editMember && (
@@ -629,6 +785,7 @@ export default function AdminDashboard() {
           isChairman={isChairman}
           onClose={() => setEditMember(null)}
           onSave={handleSave}
+          onVerified={handleVerified}
         />
       )}
     </div>
