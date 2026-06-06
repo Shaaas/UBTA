@@ -4,8 +4,10 @@ import { generateCertificateHTML } from "../../../../lib/certificate-template";
 export default async function CertificatePage({
   params,
 }: {
-  params: { memberId: string };
+  params: Promise<{ memberId: string }>;
 }) {
+  const { memberId } = await params;
+
   const supabase = createClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.SUPABASE_SERVICE_ROLE_KEY!
@@ -18,14 +20,14 @@ export default async function CertificatePage({
       bike_registration_number, working_county, created_at,
       transactions (mpesa_receipt_number, transaction_type, created_at)
     `)
-    .eq("id", params.memberId)
+    .eq("id", memberId)
     .single();
 
   if (error || !member) {
     return (
       <div style={{ fontFamily: "sans-serif", padding: 40, color: "#fff", background: "#0B1220", minHeight: "100vh" }}>
         <p style={{ color: "#f87171", fontWeight: "bold" }}>Error loading certificate</p>
-        <p style={{ color: "#94a3b8", marginTop: 8, fontSize: 14 }}>Member ID: {params.memberId}</p>
+        <p style={{ color: "#94a3b8", marginTop: 8, fontSize: 14 }}>Member ID: {memberId}</p>
         <p style={{ color: "#94a3b8", marginTop: 4, fontSize: 14 }}>
           Error: {error?.message ?? "Member not found"}
         </p>
