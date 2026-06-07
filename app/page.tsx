@@ -8,8 +8,8 @@ import { UBTA_CONFIG } from '../config';
 export default function HomePage() {
   return (
     <div 
-      className="bg-[#0B0F19] text-white min-h-[calc(100vh-73px)] flex flex-col relative bg-cover bg-right lg:bg-center bg-no-repeat bg-fixed"
-      style={{ backgroundImage: "url('/bike%201.jpg')" }}
+<div 
+  className="bg-[#0B0F19] text-white min-h-[calc(100vh-73px)] flex flex-col relative bg-cover bg-right lg:bg-center bg-no-repeat bg-fixed overflow-x-hidden"      style={{ backgroundImage: "url('/bike%201.jpg')" }}
     >
       
       {/* 
@@ -27,8 +27,7 @@ export default function HomePage() {
       </div>
 
       {/* Main Hero Container Core */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 py-16 md:py-20 w-full relative z-10">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center w-full">
+<div className="max-w-7xl mx-auto px-4 sm:px-6 py-16 md:py-20 w-full relative z-10 overflow-x-hidden">        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center w-full">
           
           {/* Left Text Column: Structural Messaging (7-span column width) */}
           <div className="space-y-8 lg:col-span-7 flex flex-col items-start text-left">
