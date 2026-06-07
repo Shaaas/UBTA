@@ -101,6 +101,53 @@ export default function HomePage() {
           <span className="text-sm font-bold animate-bounce">↓</span>
         </div>
       </div>
+      {/* Emergency & Contact Directory */}
+      <div className="border-t border-gray-800/60 bg-[#111827]/40 backdrop-blur-md w-full py-10 relative z-10">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6">
+          <div className="bg-[#111827]/70 border border-gray-800/80 rounded-2xl p-6 md:p-8 shadow-xl">
+            <h3 className="text-lg font-bold text-white mb-2 flex items-center gap-2">
+              <span className="w-1.5 h-4 bg-[#F37121] rounded" /> Contact & Emergency Directory
+            </h3>
+            <p className="text-xs text-gray-400 mb-6">
+              For registration, office details, or emergency support — reach UBTA leadership directly.
+            </p>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+
+              <div className="p-4 bg-[#0B0F19]/90 border border-gray-800 rounded-xl">
+                <span className="text-[10px] font-bold text-gray-500 uppercase block mb-1">Registration / Office</span>
+                <span className="text-sm font-bold text-white block">General Enquiries</span>
+                <a href="tel:0714314342" className="text-[#F37121] font-mono font-black text-base hover:underline">0714 314 342</a>
+              </div>
+
+              <div className="p-4 bg-[#0B0F19]/90 border border-gray-800 rounded-xl">
+                <span className="text-[10px] font-bold text-gray-500 uppercase block mb-1">Arrest / Motorbike Emergency</span>
+                <span className="text-sm font-bold text-white block mb-2">Leadership Contacts</span>
+                <div className="space-y-1.5">
+                  <div>
+                    <span className="text-[10px] text-gray-400">Chairman</span><br />
+                    <a href="tel:0715050260" className="text-[#00A651] font-mono font-black text-sm hover:underline">0715 050 260</a>
+                  </div>
+                  <div>
+                    <span className="text-[10px] text-gray-400">Secretary</span><br />
+                    <a href="tel:0726571139" className="text-[#00A651] font-mono font-black text-sm hover:underline">0726 571 139</a>
+                  </div>
+                  <div>
+                    <span className="text-[10px] text-gray-400">Vice Chairman</span><br />
+                    <a href="tel:0729550820" className="text-[#00A651] font-mono font-black text-sm hover:underline">0729 550 820</a>
+                  </div>
+                </div>
+              </div>
+
+              <div className="p-4 bg-[#0B0F19]/90 border border-gray-800 rounded-xl">
+                <span className="text-[10px] font-bold text-gray-500 uppercase block mb-1">Nairobi County UBTA</span>
+                <span className="text-sm font-bold text-white block">County Chairman</span>
+                <a href="tel:0711715588" className="text-[#2096D4] font-mono font-black text-base hover:underline">0711 715 588</a>
+              </div>
+
+            </div>
+          </div>
+        </div>
+      </div>
 
       {/* Compliance Requirements Grid Container (Positioned right before footer) */}
       <div className="border-t border-gray-800/60 bg-[#111827]/40 backdrop-blur-md w-full py-12 mt-auto relative z-10">
