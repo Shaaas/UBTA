@@ -27,6 +27,7 @@ interface IndividualForm {
   county: string;
   subCounty: string;
   stageNode: string;
+  stageNodeCustom: string;
   kinName: string;
   kinPhone: string;
   kinRelationship: string;
@@ -72,7 +73,7 @@ const KIN_RELATIONSHIPS = ["Spouse", "Parent", "Sibling", "Child"];
 const EMPTY_INDIVIDUAL: IndividualForm = {
   fullName: "", phone: "", dob: "", idNumber: "", kraPin: "",
   plateNumber: "", county: "", subCounty: "", stageNode: "",
-  kinName: "", kinPhone: "", kinRelationship: "",
+  stageNodeCustom: "", kinName: "", kinPhone: "", kinRelationship: "",
 };
 
 const EMPTY_AFFILIATE: AffiliateForm = {
@@ -290,24 +291,23 @@ export default function RegisterPage() {
 
   // Individual form
   const [form, setForm] = useState<IndividualForm>(EMPTY_INDIVIDUAL);
-  const [idFile, setIdFile]     = useState<UploadedFile>(null);
-  const [kraFile, setKraFile]   = useState<UploadedFile>(null);
-  const [photoFile, setPhotoFile] = useState<UploadedFile>(null);
+  const [idFile,     setIdFile]     = useState<UploadedFile>(null);
+  const [idBackFile, setIdBackFile] = useState<UploadedFile>(null);
+  const [photoFile,  setPhotoFile]  = useState<UploadedFile>(null);
 
   // Affiliate form
   const [affForm, setAffForm] = useState<AffiliateForm>(EMPTY_AFFILIATE);
-  const [affRegDoc, setAffRegDoc]     = useState<UploadedFile>(null);
-  const [affKraDoc, setAffKraDoc]     = useState<UploadedFile>(null);
+  const [affRegDoc,    setAffRegDoc]    = useState<UploadedFile>(null);
+  const [affKraDoc,    setAffKraDoc]    = useState<UploadedFile>(null);
   const [affLetterDoc, setAffLetterDoc] = useState<UploadedFile>(null);
 
-  const [submitting, setSubmitting] = useState(false);
-  const [submitted,  setSubmitted]  = useState(false);
-  const [error,      setError]      = useState<string | null>(null);
-  const [successMsg, setSuccessMsg] = useState<string | null>(null);
-  const [mpesaReceipt,  setMpesaReceipt]  = useState("");  
+  const [submitting,   setSubmitting]   = useState(false);
+  const [submitted,    setSubmitted]    = useState(false);
+  const [error,        setError]        = useState<string | null>(null);
+  const [mpesaReceipt, setMpesaReceipt] = useState("");
 
   // Derived
-  const subCountyOpts = form.county ? (SUB_COUNTIES[form.county] ?? []) : [];
+  const subCountyOpts    = form.county    ? (SUB_COUNTIES[form.county]    ?? []) : [];
   const affSubCountyOpts = affForm.county ? (SUB_COUNTIES[affForm.county] ?? []) : [];
 
   const updateForm = (n: string, v: string) => {
@@ -487,7 +487,7 @@ export default function RegisterPage() {
         setError("Please complete all required fields before proceeding.");
         return;
       }
-      if (!idFile || !kraFile || !photoFile) {
+      if (!idFile || !idBackFile || !photoFile) {
         setError("Please upload all three required documents.");
         return;
       }
@@ -563,13 +563,13 @@ export default function RegisterPage() {
                     value={form.stageNode} onChange={updateForm} options={STAGE_NODES} placeholder="Select your stage or choose Other" />
                 </div>
                 {form.stageNode === "Other / Not Listed" && (
-  <div className="sm:col-span-2">
-    <Field icon={MapPin} label="Enter Your Stage Name" name="stageNodeCustom"
-      placeholder="e.g. Roysambu, Mwea, Thika Town Stage"
-      value={(form as any).stageNodeCustom || ""} onChange={updateForm}
-      hint="Type the name of your stage as it's commonly known" />
-  </div>
-)}
+                  <div className="sm:col-span-2">
+                    <Field icon={MapPin} label="Enter Your Stage Name" name="stageNodeCustom"
+                      placeholder="e.g. Roysambu, Mwea, Thika Town Stage"
+                      value={form.stageNodeCustom} onChange={updateForm}
+                      hint="Type the name of your stage as it's commonly known" />
+                  </div>
+                )}
               </div>
             </Section>
 
@@ -595,10 +595,10 @@ export default function RegisterPage() {
               <SectionHeading number="04" title="Document Upload"
                 subtitle="Clear scans or photos. JPG, PNG, or PDF. Max 5MB each." />
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
-                <UploadField label="National ID Copy" hint="Front & back · Max 5MB"
+                <UploadField label="National ID — Front" hint="Photo side showing your name & ID number · JPG, PNG or PDF · Max 5MB"
                   file={idFile} onFile={setIdFile} />
-                <UploadField label="KRA PIN Document" hint="JPG, PNG or PDF · Max 5MB"
-                  file={kraFile} onFile={setKraFile} />
+                <UploadField label="National ID — Back" hint="Back side showing your fingerprint & serial number · JPG, PNG or PDF · Max 5MB"
+                  file={idBackFile} onFile={setIdBackFile} />
                 <UploadField label="Passport Photo" hint="Plain background · Clear face"
                   file={photoFile} onFile={setPhotoFile} accept="image/*" />
               </div>
@@ -718,8 +718,8 @@ export default function RegisterPage() {
                 <UploadField label="Registration Certificate"
                   hint="SASRA or cooperative certificate"
                   file={affRegDoc} onFile={setAffRegDoc} />
-                <UploadField label="KRA PIN Certificate"
-                  hint="Organisation KRA PIN document"
+                <UploadField label="Back Side of ID"
+                  hint="ID back page · Max 5MB"
                   file={affKraDoc} onFile={setAffKraDoc} />
                 <UploadField label="Letter of Intent"
                   hint="Signed letter from your leadership"
@@ -768,7 +768,6 @@ export default function RegisterPage() {
       : getFees(membership);
     const total = fees.reduce((s, f) => s + f.amount, 0);
 
-
     const handleSubmit = async (e: React.FormEvent) => {
       e.preventDefault();
       setError(null);
@@ -791,7 +790,7 @@ export default function RegisterPage() {
             bikeRegistration: isAffiliate ? "" : form.plateNumber,
             county:           isAffiliate ? affForm.county : form.county,
             subCounty:        isAffiliate ? affForm.subCounty : form.subCounty,
-            stageNode:        isAffiliate ? "" : form.stageNode,
+            stageNode:        isAffiliate ? "" : (form.stageNode === "Other / Not Listed" ? form.stageNodeCustom : form.stageNode),
             dateOfBirth:      isAffiliate ? null : form.dob,
             kraPin:           isAffiliate ? affForm.kraPin : form.kraPin,
             emailAddress:     isAffiliate ? affForm.email : "",
