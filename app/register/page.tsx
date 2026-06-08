@@ -597,8 +597,8 @@ export default function RegisterPage() {
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
                 <UploadField label="National ID Copy" hint="Front & back · Max 5MB"
                   file={idFile} onFile={setIdFile} />
-                <UploadField label="KRA PIN Document" hint="JPG, PNG or PDF · Max 5MB"
-                  file={kraFile} onFile={setKraFile} />
+                <UploadField label="BACKSIDE OF ID" hint="JPG, PNG or PDF · Max 5MB"
+                  file={idFile} onFile={idFile} />
                 <UploadField label="Passport Photo" hint="Plain background · Clear face"
                   file={photoFile} onFile={setPhotoFile} accept="image/*" />
               </div>
