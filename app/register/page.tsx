@@ -1,7 +1,4 @@
 "use client";
-const [idFile, setIdFile]       = useState<UploadedFile>(null);
-const [idBackFile, setIdBackFile] = useState<UploadedFile>(null);  // ← add this
-const [photoFile, setPhotoFile] = useState<UploadedFile>(null);
 
 import { useState, useRef } from "react";
 import Link from "next/link";
@@ -598,12 +595,12 @@ export default function RegisterPage() {
               <SectionHeading number="04" title="Document Upload"
                 subtitle="Clear scans or photos. JPG, PNG, or PDF. Max 5MB each." />
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
-                <UploadField label="National ID — Front" hint="Front side · Max 5MB"
-  file={idFile} onFile={setIdFile} />
-<UploadField label="National ID — Back" hint="Back side · Max 5MB"
-  file={idBackFile} onFile={setIdBackFile} />
-<UploadField label="Passport Photo" hint="Plain background · Clear face"
-  file={photoFile} onFile={setPhotoFile} accept="image/*" />
+                <UploadField label="National ID Copy" hint="Front & back · Max 5MB"
+                  file={idFile} onFile={setIdFile} />
+                <UploadField label="KRA PIN Document" hint="JPG, PNG or PDF · Max 5MB"
+                  file={kraFile} onFile={setKraFile} />
+                <UploadField label="Passport Photo" hint="Plain background · Clear face"
+                  file={photoFile} onFile={setPhotoFile} accept="image/*" />
               </div>
             </Section>
 
@@ -721,8 +718,8 @@ export default function RegisterPage() {
                 <UploadField label="Registration Certificate"
                   hint="SASRA or cooperative certificate"
                   file={affRegDoc} onFile={setAffRegDoc} />
-                <UploadField label="Back side of ID"
-                  hint="ID backpage"
+                <UploadField label="KRA PIN Certificate"
+                  hint="Organisation KRA PIN document"
                   file={affKraDoc} onFile={setAffKraDoc} />
                 <UploadField label="Letter of Intent"
                   hint="Signed letter from your leadership"
