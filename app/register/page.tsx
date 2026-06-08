@@ -1,4 +1,7 @@
 "use client";
+const [idFile, setIdFile]       = useState<UploadedFile>(null);
+const [idBackFile, setIdBackFile] = useState<UploadedFile>(null);  // ← add this
+const [photoFile, setPhotoFile] = useState<UploadedFile>(null);
 
 import { useState, useRef } from "react";
 import Link from "next/link";
@@ -595,12 +598,12 @@ export default function RegisterPage() {
               <SectionHeading number="04" title="Document Upload"
                 subtitle="Clear scans or photos. JPG, PNG, or PDF. Max 5MB each." />
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
-                <UploadField label="National ID Copy" hint="Front & back · Max 5MB"
-                  file={idFile} onFile={setIdFile} />
-                <UploadField label="BACKSIDE OF ID" hint="JPG, PNG or PDF · Max 5MB"
-                  file={idFile} onFile={idFile} />
-                <UploadField label="Passport Photo" hint="Plain background · Clear face"
-                  file={photoFile} onFile={setPhotoFile} accept="image/*" />
+                <UploadField label="National ID — Front" hint="Front side · Max 5MB"
+  file={idFile} onFile={setIdFile} />
+<UploadField label="National ID — Back" hint="Back side · Max 5MB"
+  file={idBackFile} onFile={setIdBackFile} />
+<UploadField label="Passport Photo" hint="Plain background · Clear face"
+  file={photoFile} onFile={setPhotoFile} accept="image/*" />
               </div>
             </Section>
 
