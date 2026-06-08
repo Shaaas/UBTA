@@ -78,13 +78,17 @@ function StatCard({ label, value, icon: Icon, color }: {
   );
 }
 
+// PATCH: Replace MemberRow function in dashboard with this version
+// Adds a "Reissue Certificate" button for verified members
+
 function MemberRow({
-  member, isChairman, onView, onEdit,
+  member, isChairman, onView, onEdit, onReissue,
 }: {
   member: Member;
   isChairman: boolean;
   onView: (m: Member) => void;
   onEdit: (m: Member) => void;
+  onReissue: (m: Member) => void;
 }) {
   const latestTx = member.transactions?.[0];
   return (
@@ -119,7 +123,7 @@ function MemberRow({
       </td>
       <td className="px-4 py-3.5 text-gray-400 text-xs">{fmt(member.created_at)}</td>
       <td className="px-4 py-3.5">
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1.5">
           <button onClick={() => onView(member)}
             className="p-1.5 text-gray-500 hover:text-white hover:bg-gray-800 rounded-lg transition-all"
             title="View details">
@@ -132,17 +136,30 @@ function MemberRow({
               <Edit2 size={14} />
             </button>
           )}
+          <button onClick={() => onReissue(member)}
+            className="p-1.5 text-gray-500 hover:text-teal-400 hover:bg-teal-500/10 rounded-lg transition-all"
+            title="Reissue certificate">
+            <FileText size={14} />
+          </button>
+          {member.certificate_url && (
+            <a href={member.certificate_url} target="_blank" rel="noopener noreferrer"
+              className="p-1.5 text-gray-500 hover:text-green-400 hover:bg-green-500/10 rounded-lg transition-all"
+              title="View certificate">
+              <Download size={14} />
+            </a>
+          )}
         </div>
       </td>
     </tr>
   );
 }
 
-function MemberModal({ member, isChairman, onClose, onSave }: {
+function MemberModal({ member, isChairman, onClose, onSave, onReissue }: {
   member: Member;
   isChairman: boolean;
   onClose: () => void;
   onSave: (id: string, updates: Partial<Member>) => Promise<void>;
+  onReissue: (m: Member) => void;
 }) {
   const [editing, setEditing] = useState(false);
   const [saving,  setSaving]  = useState(false);
@@ -217,6 +234,15 @@ function MemberModal({ member, isChairman, onClose, onSave }: {
             <p className="text-gray-500 text-xs mt-1">Registered {fmt(member.created_at)}</p>
           </div>
           <div className="flex items-center gap-2">
+            {!editing && (
+              <button
+                onClick={() => onReissue(member)}
+                className="flex items-center gap-1.5 px-3 py-2 bg-teal-500/10 border border-teal-500/30
+                           text-teal-400 text-xs font-bold rounded-lg hover:bg-teal-500/20 transition-all"
+                title="Reissue certificate">
+                <FileText size={13} /> Reissue
+              </button>
+            )}
             {isChairman && !editing && (
               <button onClick={() => setEditing(true)}
                 className="flex items-center gap-1.5 px-3 py-2 bg-orange-500/10 border border-orange-500/30
@@ -606,21 +632,156 @@ function VerifyModal({ member, onClose, onDone }: {
   );
 }
 
+// ─── Reissue modal ────────────────────────────────────────────────────────────
+
+function ReissueModal({ member, onClose, onDone }: {
+  member: Member;
+  onClose: () => void;
+  onDone: () => void;
+}) {
+  const [loading,    setLoading]    = useState(false);
+  const [error,      setError]      = useState<string | null>(null);
+  const [certResult, setCertResult] = useState<{ certUrl: string; waLink: string } | null>(null);
+
+  const handleReissue = async () => {
+    setError(null);
+    setLoading(true);
+    try {
+      const res  = await fetch("/api/admin/certificate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ memberId: member.id }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error);
+      setCertResult({ certUrl: data.certificateUrl, waLink: data.whatsappLink });
+    } catch (e: unknown) {
+      setError(e instanceof Error ? e.message : "Something went wrong");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div className="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+      <div className="bg-[#111827] border border-gray-800 rounded-2xl w-full max-w-md shadow-2xl">
+
+        {/* Header */}
+        <div className="flex items-center justify-between p-5 border-b border-gray-800">
+          <div className="flex items-center gap-2">
+            <FileText size={15} className="text-teal-400" />
+            <h3 className="font-black text-white uppercase tracking-tight">Reissue Certificate</h3>
+          </div>
+          <button onClick={onClose} className="text-gray-500 hover:text-white transition-colors">
+            <X size={16} />
+          </button>
+        </div>
+
+        <div className="p-5 space-y-4">
+          {error && (
+            <div className="flex items-center gap-2 bg-red-500/10 border border-red-500/30 text-red-400 text-xs rounded-xl px-4 py-3">
+              <AlertCircle size={14} /> {error}
+            </div>
+          )}
+
+          {certResult ? (
+            <div className="space-y-4">
+              <div className="flex items-center gap-3 bg-teal-500/10 border border-teal-500/30 rounded-xl p-4">
+                <CheckCircle size={20} className="text-teal-400 shrink-0" />
+                <div>
+                  <p className="text-white font-bold text-sm">Certificate reissued!</p>
+                  <p className="text-gray-400 text-xs mt-0.5">
+                    A new certificate has been generated for {member.full_name}.
+                  </p>
+                </div>
+              </div>
+
+              <a href={certResult.certUrl} target="_blank" rel="noopener noreferrer"
+                className="w-full flex items-center justify-center gap-2 bg-teal-500/10 border border-teal-500/30
+                           text-teal-400 font-bold text-sm py-3 rounded-xl hover:bg-teal-500/20 transition-all">
+                <Eye size={15} /> View Certificate PDF
+              </a>
+
+              <a href={certResult.waLink} target="_blank" rel="noopener noreferrer"
+                className="w-full flex items-center justify-center gap-2 bg-green-600 hover:bg-green-500
+                           text-white font-bold text-sm py-3 rounded-xl transition-all">
+                <Phone size={15} /> Send to Member via WhatsApp
+              </a>
+
+              <button onClick={onDone}
+                className="w-full text-gray-500 hover:text-gray-300 text-xs font-semibold py-2 transition-colors">
+                Close
+              </button>
+            </div>
+          ) : (
+            <>
+              {/* Member summary */}
+              <div className="bg-[#0B0F19] border border-gray-800 rounded-xl p-4 space-y-2">
+                <div className="flex justify-between text-sm">
+                  <span className="text-gray-500">Member</span>
+                  <span className="text-white font-semibold">{member.full_name}</span>
+                </div>
+                <div className="flex justify-between text-sm">
+                  <span className="text-gray-500">Member #</span>
+                  <span className="text-orange-400 font-black font-mono">#{member.member_number}</span>
+                </div>
+                <div className="flex justify-between text-sm">
+                  <span className="text-gray-500">Phone</span>
+                  <span className="text-white font-mono">{member.phone_number}</span>
+                </div>
+              </div>
+
+              {/* Existing cert link if present */}
+              {member.certificate_url && (
+                <div className="flex items-center justify-between bg-[#0B0F19] border border-gray-800 rounded-xl px-4 py-3">
+                  <span className="text-gray-500 text-xs">Current certificate</span>
+                  <a href={member.certificate_url} target="_blank" rel="noopener noreferrer"
+                    className="flex items-center gap-1.5 text-teal-400 text-xs font-bold hover:text-teal-300 transition-colors">
+                    <Eye size={12} /> View
+                  </a>
+                </div>
+              )}
+
+              <div className="bg-amber-500/5 border border-amber-500/20 rounded-xl px-4 py-3">
+                <p className="text-amber-400 text-xs">
+                  This will regenerate and replace the existing certificate PDF for this member.
+                </p>
+              </div>
+
+              <button onClick={handleReissue} disabled={loading}
+                className="w-full bg-teal-600 hover:bg-teal-500 disabled:opacity-50 disabled:cursor-not-allowed
+                           text-white font-bold uppercase tracking-wide py-3.5 rounded-xl transition-all
+                           flex items-center justify-center gap-2 text-sm">
+                {loading ? (
+                  <><span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" /> Generating...</>
+                ) : (
+                  <><FileText size={15} /> Regenerate Certificate</>
+                )}
+              </button>
+            </>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 // ─── Main dashboard ───────────────────────────────────────────────────────────
 
 export default function AdminDashboard() {
-  const [admin,         setAdmin]         = useState<AdminInfo | null>(null);
-  const [activeTab,     setActiveTab]     = useState<"pending" | "verified">("pending");
-  const [members,       setMembers]       = useState<Member[]>([]);
-  const [pendingMembers,setPendingMembers] = useState<Member[]>([]);
-  const [total,         setTotal]         = useState(0);
-  const [page,          setPage]          = useState(1);
-  const [search,        setSearch]        = useState("");
-  const [searchInput,   setSearchInput]   = useState("");
-  const [loading,       setLoading]       = useState(false);
-  const [viewMember,    setViewMember]    = useState<Member | null>(null);
-  const [editMember,    setEditMember]    = useState<Member | null>(null);
-  const [verifyMember,  setVerifyMember]  = useState<Member | null>(null);
+  const [admin,           setAdmin]           = useState<AdminInfo | null>(null);
+  const [activeTab,       setActiveTab]       = useState<"pending" | "verified">("pending");
+  const [members,         setMembers]         = useState<Member[]>([]);
+  const [pendingMembers,  setPendingMembers]  = useState<Member[]>([]);
+  const [total,           setTotal]           = useState(0);
+  const [page,            setPage]            = useState(1);
+  const [search,          setSearch]          = useState("");
+  const [searchInput,     setSearchInput]     = useState("");
+  const [loading,         setLoading]         = useState(false);
+  const [viewMember,      setViewMember]      = useState<Member | null>(null);
+  const [editMember,      setEditMember]      = useState<Member | null>(null);
+  const [verifyMember,    setVerifyMember]    = useState<Member | null>(null);
+  const [reissueMember,   setReissueMember]   = useState<Member | null>(null);
 
   const isChairman = admin?.role === "chairman";
   const totalPages = Math.ceil(total / 20);
@@ -669,6 +830,18 @@ export default function AdminDashboard() {
 
   const handleVerifyDone = () => {
     setVerifyMember(null);
+    fetchMembers();
+  };
+
+  // Open reissue modal; close any open view/edit modal first so they don't stack
+  const handleReissueOpen = (member: Member) => {
+    setViewMember(null);
+    setEditMember(null);
+    setReissueMember(member);
+  };
+
+  const handleReissueDone = () => {
+    setReissueMember(null);
     fetchMembers();
   };
 
@@ -853,6 +1026,7 @@ export default function AdminDashboard() {
                       isChairman={isChairman}
                       onView={setViewMember}
                       onEdit={setEditMember}
+                      onReissue={handleReissueOpen}
                     />
                   ))}
                 </tbody>
@@ -892,6 +1066,7 @@ export default function AdminDashboard() {
           isChairman={isChairman}
           onClose={() => setViewMember(null)}
           onSave={handleSave}
+          onReissue={handleReissueOpen}
         />
       )}
       {editMember && (
@@ -900,6 +1075,7 @@ export default function AdminDashboard() {
           isChairman={isChairman}
           onClose={() => setEditMember(null)}
           onSave={handleSave}
+          onReissue={handleReissueOpen}
         />
       )}
       {verifyMember && (
@@ -907,6 +1083,13 @@ export default function AdminDashboard() {
           member={verifyMember}
           onClose={() => setVerifyMember(null)}
           onDone={handleVerifyDone}
+        />
+      )}
+      {reissueMember && (
+        <ReissueModal
+          member={reissueMember}
+          onClose={() => setReissueMember(null)}
+          onDone={handleReissueDone}
         />
       )}
     </div>
