@@ -1,83 +1,212 @@
 "use client";
 
-import React, { useState } from 'react';
+import { useState } from "react";
+import { Search, CheckCircle2, XCircle, User, Phone, CreditCard, Hash, Loader2 } from "lucide-react";
 
-const MOCK_REGISTRY = [
-  { id: "1", name: "John Kamau Omondi", plate: "KMCX 123A", idNo: "32145678", stage: "Khoja Stage", status: "Active", sacco: "CBD Co-operative" },
-  { id: "2", name: "David Mwangi Njoroge", plate: "KMDQ 789B", idNo: "28765432", stage: "Commercial", status: "Pending Payment", sacco: "CBD Co-operative" },
-  { id: "3", name: "Evans Kipchirchir", plate: "KMCE 456Z", idNo: "30459812", stage: "Ambassadeur", status: "Active", sacco: "CBD Co-operative" }
-];
+const SHEET_ID = "https://docs.google.com/spreadsheets/d/1SJevrYGlncKKDXeRcHZUEXHfshKIEk84pYZpyWYZ5pI/edit?usp=sharingD_HERE"; // 🔁 Replace with your actual Sheet ID
+const SHEET_NAME = "UBTA data";           // 🔁 Change if your sheet tab has a different name
 
-export default function VerifyRider() {
-  const [searchQuery, setSearchQuery] = useState('');
-  const [searchResult, setSearchResult] = useState<typeof MOCK_REGISTRY | null>(null);
-  const [hasSearched, setHasSearched] = useState(false);
+type Member = {
+  ubtaNo: string;
+  name: string;
+  idNo: string;
+  phone: string;
+};
 
-  const handleSearch = (e: React.FormEvent) => {
-    e.preventDefault();
-    setHasSearched(true);
-    if (!searchQuery.trim()) {
-      setSearchResult([]);
-      return;
+function normalize(val: string) {
+  return val.replace(/\s+/g, "").toLowerCase();
+}
+
+export default function VerifyPage() {
+  const [query, setQuery] = useState("");
+  const [result, setResult] = useState<Member | null | "not_found">(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const handleSearch = async () => {
+    const q = query.trim();
+    if (!q) return;
+
+    setLoading(true);
+    setResult(null);
+    setError(null);
+
+    try {
+      const url = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json&sheet=${encodeURIComponent(SHEET_NAME)}`;
+      const res = await fetch(url);
+      const text = await res.text();
+
+      // Strip Google's JSONP wrapper
+      const json = JSON.parse(text.replace(/^[^{]*/, "").replace(/[^}]*$/, ""));
+      const rows = json.table.rows;
+
+      const match = rows.find((row: any) => {
+        const ubtaNo = String(row.c[0]?.v ?? "");
+        const name   = String(row.c[1]?.v ?? "");
+        const idNo   = String(row.c[2]?.v ?? "");
+        const phone  = String(row.c[3]?.v ?? "");
+
+        const nq = normalize(q);
+        return (
+          normalize(ubtaNo) === nq ||
+          normalize(idNo)   === nq ||
+          normalize(phone)  === nq
+        );
+      });
+
+      if (match) {
+        setResult({
+          ubtaNo: String(match.c[0]?.v ?? "—"),
+          name:   String(match.c[1]?.v ?? "—"),
+          idNo:   String(match.c[2]?.v ?? "—"),
+          phone:  String(match.c[3]?.v ?? "—"),
+        });
+      } else {
+        setResult("not_found");
+      }
+    } catch (err) {
+      setError("Could not reach the membership database. Please try again.");
+    } finally {
+      setLoading(false);
     }
-    const filtered = MOCK_REGISTRY.filter(rider => 
-      rider.plate.toLowerCase().includes(searchQuery.toLowerCase()) || rider.idNo.includes(searchQuery)
-    );
-    setSearchResult(filtered);
   };
 
   return (
-    <div className="min-h-[calc(100vh-73px)] bg-[#0B0F19] px-4 sm:px-6 py-12 flex flex-col items-center">
-      <div className="max-w-2xl w-full">
-        <div className="text-center mb-10">
-          <h1 className="text-2xl sm:text-3xl font-black text-white tracking-tight">UBTA Compliance Registry Lookup</h1>
-          <p className="text-sm text-gray-400 mt-2">Verify rider enrollment parameters, active operational clearance, and affiliated SACCO branches instantly.</p>
+    <div className="min-h-screen bg-[#0B0F19] flex flex-col items-center justify-start px-4 py-16">
+
+      {/* Header */}
+      <div className="w-full max-w-xl text-center mb-10">
+        <div className="inline-flex items-center gap-2 bg-orange-500/10 border border-orange-500/20 text-orange-400 text-[11px] font-bold px-3 py-1.5 rounded-full mb-4">
+          <CheckCircle2 size={11} /> Member Verification
         </div>
-        <div className="bg-[#111827] border border-gray-800 rounded-2xl p-6 shadow-xl mb-8">
-          <form onSubmit={handleSearch} className="flex flex-col sm:flex-row gap-3">
-            <div className="flex-1">
-              <input type="text" value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} placeholder="Enter Plate No. (e.g. KMCX 123A) or National ID..." className="w-full bg-[#0B0F19] border border-gray-800 rounded-lg px-4 py-3 text-white placeholder-gray-600 focus:outline-none focus:border-[#2096D4] text-sm uppercase" />
-            </div>
-            <button type="submit" className="btn-accent py-3 sm:py-auto px-6 font-bold text-sm">Search Registry</button>
-          </form>
-        </div>
-        {hasSearched && searchResult && (
-          <div className="space-y-4">
-            {searchResult.length > 0 ? (
-              searchResult.map((rider) => (
-                <div key={rider.id} className="bg-[#111827] border border-gray-800 rounded-xl p-5 sm:p-6 shadow-md">
-                  <div className="flex items-center justify-between border-b border-gray-800 pb-4 mb-4">
-                    <div>
-                      <h3 className="text-lg font-bold text-white leading-tight">{rider.name}</h3>
-                      <p className="text-xs text-gray-500 mt-1">ID Number: {rider.idNo}</p>
-                    </div>
-                    <span className={`px-3 py-1 rounded-full text-xs font-bold ${rider.status === 'Active' ? 'bg-[#00A651]/10 text-[#00A651]' : 'bg-[#F37121]/10 text-[#F37121]'}`}>{rider.status}</span>
-                  </div>
-                  <div className="grid grid-cols-2 gap-4 text-sm">
-                    <div>
-                      <span className="text-[11px] font-bold text-gray-500 uppercase tracking-wider block">Plate Number</span>
-                      <span className="text-white font-mono font-bold mt-0.5 inline-block bg-[#0B0F19] px-2 py-0.5 rounded border border-gray-800 text-xs">{rider.plate}</span>
-                    </div>
-                    <div>
-                      <span className="text-[11px] font-bold text-gray-500 uppercase tracking-wider block">Assigned Stage</span>
-                      <span className="text-gray-300 font-medium mt-0.5 inline-block">{rider.stage}</span>
-                    </div>
-                    <div className="col-span-2 pt-2 border-t border-gray-800/40 mt-2">
-                      <span className="text-[11px] font-bold text-gray-500 uppercase tracking-wider block">Affiliated Ecosystem Group</span>
-                      <span className="text-[#2096D4] font-semibold mt-0.5 inline-block">{rider.sacco}</span>
-                    </div>
-                  </div>
-                </div>
-              ))
-            ) : (
-              <div className="bg-[#111827]/40 border border-gray-800 border-dashed rounded-xl p-8 text-center text-gray-400">
-                <p className="font-semibold text-white">No Record Located</p>
-                <p className="text-xs mt-1 max-w-sm mx-auto text-gray-500">The identifier requested does not match any authenticated operator parameters inside the active UBTA database grid.</p>
-              </div>
-            )}
-          </div>
-        )}
+        <h1 className="text-4xl font-black text-white uppercase tracking-tight mb-3">
+          Verify a <span className="text-[#F37121]">Member</span>
+        </h1>
+        <p className="text-slate-400 text-sm leading-relaxed">
+          Search by UBTA number, ID number, or phone number to confirm membership status.
+        </p>
       </div>
+
+      {/* Search box */}
+      <div className="w-full max-w-xl">
+        <div className="flex gap-2">
+          <div className="relative flex-1">
+            <div className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-500 pointer-events-none">
+              <Search size={16} />
+            </div>
+            <input
+              type="text"
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              onKeyDown={(e) => e.key === "Enter" && handleSearch()}
+              placeholder="UBTA No, ID No, or Phone Number"
+              className="w-full bg-slate-900 border border-slate-800 rounded-xl pl-10 pr-4 py-4
+                         text-white text-sm placeholder:text-slate-600
+                         focus:outline-none focus:border-orange-500/50 transition-all"
+            />
+          </div>
+          <button
+            onClick={handleSearch}
+            disabled={loading || !query.trim()}
+            className="px-6 py-4 bg-[#F37121] hover:bg-orange-600 disabled:opacity-40 disabled:cursor-not-allowed
+                       text-white font-bold rounded-xl transition-all flex items-center gap-2 text-sm"
+          >
+            {loading ? <Loader2 size={16} className="animate-spin" /> : "Search"}
+          </button>
+        </div>
+        <p className="text-slate-600 text-xs mt-2 text-center">
+          Enter any one — UBTA number, ID number, or phone number
+        </p>
+      </div>
+
+      {/* Error */}
+      {error && (
+        <div className="w-full max-w-xl mt-6 flex items-center gap-3 bg-red-500/10 border border-red-500/20 rounded-xl p-4 text-sm text-red-400">
+          <XCircle size={15} className="shrink-0" /> {error}
+        </div>
+      )}
+
+      {/* Not found */}
+      {result === "not_found" && (
+        <div className="w-full max-w-xl mt-6 text-center bg-slate-900/40 border border-slate-800 rounded-2xl p-8">
+          <div className="w-14 h-14 rounded-full bg-red-500/10 border border-red-500/20 flex items-center justify-center mx-auto mb-4">
+            <XCircle size={24} className="text-red-400" />
+          </div>
+          <h2 className="text-white font-bold text-lg uppercase mb-2">No Member Found</h2>
+          <p className="text-slate-500 text-sm">
+            No active member matched your search. Double-check the details or contact the UBTA office on{" "}
+            <a href="tel:0714314342" className="text-[#F37121] font-bold hover:underline">0714 314 342</a>.
+          </p>
+        </div>
+      )}
+
+      {/* Found */}
+      {result && result !== "not_found" && (
+        <div className="w-full max-w-xl mt-6">
+          <div className="bg-slate-900/40 border border-green-500/30 rounded-2xl overflow-hidden">
+
+            {/* Status banner */}
+            <div className="bg-green-500/10 border-b border-green-500/20 px-6 py-4 flex items-center gap-3">
+              <div className="w-8 h-8 rounded-full bg-green-500/20 flex items-center justify-center">
+                <CheckCircle2 size={16} className="text-green-400" />
+              </div>
+              <div>
+                <p className="text-green-400 font-bold text-sm uppercase tracking-wide">Verified Active Member</p>
+                <p className="text-slate-500 text-xs">This person is a registered UBTA member</p>
+              </div>
+            </div>
+
+            {/* Details */}
+            <div className="p-6 space-y-4">
+              <div className="flex items-center gap-3">
+                <div className="w-9 h-9 rounded-lg bg-slate-800 flex items-center justify-center shrink-0">
+                  <Hash size={14} className="text-[#F37121]" />
+                </div>
+                <div>
+                  <p className="text-[10px] text-slate-500 uppercase font-bold tracking-widest">UBTA Number</p>
+                  <p className="text-white font-black font-mono text-lg">{result.ubtaNo}</p>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-3">
+                <div className="w-9 h-9 rounded-lg bg-slate-800 flex items-center justify-center shrink-0">
+                  <User size={14} className="text-[#F37121]" />
+                </div>
+                <div>
+                  <p className="text-[10px] text-slate-500 uppercase font-bold tracking-widest">Full Name</p>
+                  <p className="text-white font-bold text-base">{result.name}</p>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-3">
+                <div className="w-9 h-9 rounded-lg bg-slate-800 flex items-center justify-center shrink-0">
+                  <CreditCard size={14} className="text-slate-400" />
+                </div>
+                <div>
+                  <p className="text-[10px] text-slate-500 uppercase font-bold tracking-widest">ID Number</p>
+                  <p className="text-slate-300 font-mono">{result.idNo}</p>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-3">
+                <div className="w-9 h-9 rounded-lg bg-slate-800 flex items-center justify-center shrink-0">
+                  <Phone size={14} className="text-slate-400" />
+                </div>
+                <div>
+                  <p className="text-[10px] text-slate-500 uppercase font-bold tracking-widest">Phone</p>
+                  <p className="text-slate-300 font-mono">{result.phone}</p>
+                </div>
+              </div>
+            </div>
+
+            <div className="px-6 pb-5">
+              <div className="bg-slate-950/60 border border-slate-800 rounded-xl px-4 py-3 text-xs text-slate-500 text-center">
+                Savings balance is private and only accessible to the member directly.
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
