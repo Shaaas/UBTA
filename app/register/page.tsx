@@ -718,8 +718,8 @@ export default function RegisterPage() {
                 <UploadField label="Registration Certificate"
                   hint="SASRA or cooperative certificate"
                   file={affRegDoc} onFile={setAffRegDoc} />
-                <UploadField label="KRA PIN Certificate"
-                  hint="Organisation KRA PIN document"
+                <UploadField label="Back side of ID"
+                  hint="ID backpage"
                   file={affKraDoc} onFile={setAffKraDoc} />
                 <UploadField label="Letter of Intent"
                   hint="Signed letter from your leadership"
