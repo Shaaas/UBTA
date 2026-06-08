@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { Search, CheckCircle2, XCircle, User, Phone, CreditCard, Hash, Loader2 } from "lucide-react";
 
-const SHEET_ID = "https://docs.google.com/spreadsheets/d/1SJevrYGlncKKDXeRcHZUEXHfshKIEk84pYZpyWYZ5pI/edit?usp=sharing"; // 🔁 Replace with your actual Sheet ID
+const SHEET_ID = "1SJevrYGlncKKDXeRcHZUEXHfshKIEk84pYZpyWYZ5pI"; // 🔁 Replace with your actual Sheet ID
 const SHEET_NAME = "Registered members"
 const SHEET_GID = "1494404164";           // 🔁 Change if your sheet tab has a different name
 
