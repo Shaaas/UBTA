@@ -532,7 +532,7 @@ export default function AboutPage() {
                 </div>
                 <div>
                   <h3 className="font-black text-white text-sm uppercase tracking-tight">CBD SACCO</h3>
-                  <p className="text-teal-400 text-[11px] font-bold">Ksh 1,200 to join + Ksh 1,200/month</p>
+                  <p className="text-teal-400 text-[11px] font-bold">Ksh 1,000 to join + Ksh 1,200/month</p>
                 </div>
               </div>
               <div className="grid sm:grid-cols-2 gap-3 mb-6">
