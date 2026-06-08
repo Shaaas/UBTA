@@ -4,7 +4,8 @@ import { useState } from "react";
 import { Search, CheckCircle2, XCircle, User, Phone, CreditCard, Hash, Loader2 } from "lucide-react";
 
 const SHEET_ID = "https://docs.google.com/spreadsheets/d/1SJevrYGlncKKDXeRcHZUEXHfshKIEk84pYZpyWYZ5pI/edit?usp=sharing"; // 🔁 Replace with your actual Sheet ID
-const SHEET_NAME = "Registered members";           // 🔁 Change if your sheet tab has a different name
+const SHEET_NAME = "Registered members"
+const SHEET_GID = "1494404164";           // 🔁 Change if your sheet tab has a different name
 
 type Member = {
   ubtaNo: string;
@@ -32,7 +33,7 @@ export default function VerifyPage() {
     setError(null);
 
     try {
-      const url = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json&sheet=${encodeURIComponent(SHEET_NAME)}`;
+      const url = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json&sheet=${encodeURIComponent(SHEET_NAME)}&gid=${SHEET_GID}`;
       const res = await fetch(url);
       const text = await res.text();
 
