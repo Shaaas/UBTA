@@ -3,8 +3,8 @@
 import { useState } from "react";
 import { Search, CheckCircle2, XCircle, User, Phone, CreditCard, Hash, Loader2 } from "lucide-react";
 
-const SHEET_ID = "https://docs.google.com/spreadsheets/d/1SJevrYGlncKKDXeRcHZUEXHfshKIEk84pYZpyWYZ5pI/edit?usp=sharingD_HERE"; // 🔁 Replace with your actual Sheet ID
-const SHEET_NAME = "UBTA data";           // 🔁 Change if your sheet tab has a different name
+const SHEET_ID = "https://docs.google.com/spreadsheets/d/1SJevrYGlncKKDXeRcHZUEXHfshKIEk84pYZpyWYZ5pI/edit?usp=sharing"; // 🔁 Replace with your actual Sheet ID
+const SHEET_NAME = "Registered members";           // 🔁 Change if your sheet tab has a different name
 
 type Member = {
   ubtaNo: string;
