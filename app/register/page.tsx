@@ -551,7 +551,7 @@ export default function RegisterPage() {
             {/* Section 2 */}
             <Section>
               <SectionHeading number="02" title="Location & Stage"
-                subtitle="Your operating county, sub-county, and base stage node." />
+                subtitle="Your operating county, sub-county, and the stage where you operate." />
               <div className="grid sm:grid-cols-2 gap-5">
                 <SelectField icon={MapPin} label="Operating County" name="county"
                   value={form.county} onChange={updateForm} options={COUNTIES} placeholder="Select county" />
@@ -559,9 +559,17 @@ export default function RegisterPage() {
                   value={form.subCounty} onChange={updateForm} options={subCountyOpts}
                   placeholder={form.county ? "Select sub-county" : "Select county first"} disabled={!form.county} />
                 <div className="sm:col-span-2">
-                  <SelectField icon={Bike} label="Base Stage Node" name="stageNode"
-                    value={form.stageNode} onChange={updateForm} options={STAGE_NODES} placeholder="Select your stage" />
+                  <SelectField icon={Bike} label="Your Stage" name="stageNode"
+                    value={form.stageNode} onChange={updateForm} options={STAGE_NODES} placeholder="Select your stage or choose Other" />
                 </div>
+                {form.stageNode === "Other / Not Listed" && (
+  <div className="sm:col-span-2">
+    <Field icon={MapPin} label="Enter Your Stage Name" name="stageNodeCustom"
+      placeholder="e.g. Roysambu, Mwea, Thika Town Stage"
+      value={(form as any).stageNodeCustom || ""} onChange={updateForm}
+      hint="Type the name of your stage as it's commonly known" />
+  </div>
+)}
               </div>
             </Section>
 
