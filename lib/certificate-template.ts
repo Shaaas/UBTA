@@ -369,7 +369,7 @@ export function generateCertificateHTML(data: CertificateData): string {
           </div>
           <div class="sig-line"></div>
           <div class="sig-label">Chairperson</div>
-          <div class="sig-name">James Muigai</div>
+          <div class="sig-name">John Njeru Kithu</div>
         </div>
 
         <div class="center-seal">
