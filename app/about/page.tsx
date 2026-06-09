@@ -368,8 +368,7 @@ export default function AboutPage() {
                 <div className="w-14 h-14 rounded-full bg-[#0B0F19] border-2 border-[#F37121]/30 overflow-hidden flex items-center justify-center shrink-0">
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img src="/leadership/chairman.jpeg" alt="Hon. John Njeru"
-                    className="w-full h-full object-cover"
-                    onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }} />
+                    className="w-full h-full object-cover" />
                 </div>
                 <div>
                   <p className="font-black text-white text-sm uppercase tracking-tight">Hon. John Njeru</p>
