@@ -290,27 +290,27 @@ export function generateCertificateHTML(data: CertificateData): string {
       <div class="meta-box">
         <div class="meta-row">
           <span class="meta-label">Member ID</span>
-          <span class="meta-value">\${memberId}</span>
+          <span class="meta-value">${memberId}</span>
         </div>
         <div class="meta-divider"></div>
         <div class="meta-row">
           <span class="meta-label">Date Joined</span>
-          <span class="meta-value">\${dateLabel}</span>
+          <span class="meta-value">${dateLabel}</span>
         </div>
         <div class="meta-divider"></div>
         <div class="meta-row">
           <span class="meta-label">Membership Type</span>
-          <span class="meta-value">\${membershipLabel}</span>
+          <span class="meta-value">${membershipLabel}</span>
         </div>
         <div class="meta-divider"></div>
         <div class="meta-row">
           <span class="meta-label">Phone Number</span>
-          <span class="meta-value">\${data.phoneNumber}</span>
+          <span class="meta-value">${data.phoneNumber}</span>
         </div>
         <div class="meta-divider"></div>
         <div class="meta-row">
           <span class="meta-label">National ID</span>
-          <span class="meta-value">\${data.idNumber}</span>
+          <span class="meta-value">${data.idNumber}</span>
         </div>
       </div>
     </div>
@@ -342,7 +342,7 @@ export function generateCertificateHTML(data: CertificateData): string {
 
       <div class="certify-strip">This is to certify that</div>
 
-      <div class="member-name">\${data.fullName}</div>
+      <div class="member-name">${data.fullName}</div>
 
       <div class="cert-body">
         is a registered member of CBD United Boda Transport Co-Operative Society Limited
@@ -355,7 +355,7 @@ export function generateCertificateHTML(data: CertificateData): string {
       <div class="sig-section">
         <div class="sig-block">
           <div class="sig-img-wrap">
-            <img src="\${CHAIRPERSON_SIG}" alt="Chairperson signature" />
+            <img src="${CHAIRPERSON_SIG}" alt="Chairperson signature" />
           </div>
           <div class="sig-line"></div>
           <div class="sig-label">Chairperson</div>
