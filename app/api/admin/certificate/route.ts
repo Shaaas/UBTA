@@ -1,3 +1,5 @@
+import fs from "fs";
+import path from "path";
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 import { jwtVerify } from "jose";
@@ -58,6 +60,10 @@ export async function POST(req: NextRequest) {
       created_at: string;
     }>)?.[0];
 
+    const sigPath = path.join(process.cwd(), "public", "chairperson.jpeg");
+    const sigBase64 = fs.readFileSync(sigPath).toString("base64");
+    const sigDataUrl = `data:image/jpeg;base64,${sigBase64}`;
+
     const certData: CertificateData = {
       memberNumber:   member.member_number,
       fullName:       member.full_name,
@@ -68,6 +74,7 @@ export async function POST(req: NextRequest) {
       dateJoined:     member.created_at,
       county:         member.working_county,
       bikeReg:        member.bike_registration_number,
+      sigDataUrl,
     };
 
     // ── 2. Generate HTML ──────────────────────────────────────────────────────

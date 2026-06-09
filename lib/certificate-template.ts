@@ -11,6 +11,7 @@ export interface CertificateData {
   dateJoined:      string;
   county:          string;
   bikeReg:        string;
+  sigDataUrl:     string;
 }
 
 function formatMembershipType(type: string): string {
