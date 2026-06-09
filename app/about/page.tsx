@@ -3,13 +3,14 @@ import Link from "next/link";
 import {
   ArrowRight, Phone, Shield, Users, TrendingUp, BookOpen,
   Heart, Target, Eye, CheckCircle, MapPin, Award, Briefcase,
-  PiggyBank, Landmark, BadgeCheck, Building2,
+  PiggyBank, Landmark, BadgeCheck, Building2, Globe, Handshake,
+  Bike, Megaphone, Wallet, Star,
 } from "lucide-react";
 
 export const metadata: Metadata = {
   title: "About & Leadership — UBTA",
   description:
-    "United Boda Transport Association — our mission, pillars, leadership, and how riders access CBD SACCO financial services across Nairobi.",
+    "United Boda Transport Association — uniting, empowering, and representing all boda boda riders, transport SACCOs, and transport stakeholders across Kenya.",
 };
 
 // ─── Data ──────────────────────────────────────────────────────────────────────
@@ -26,45 +27,66 @@ const PILLARS = [
     icon: Shield,
     title: "Rider Welfare",
     description:
-      "Advocacy and legal representation ensuring every registered rider has a voice, protection, and support when it matters most.",
+      "Advocacy and legal representation ensuring every registered rider has a voice, protection, and support at county and national levels.",
     bgTheme: "bg-[#F37121]/10 border-[#F37121]/20 text-[#F37121]",
   },
   {
     icon: Users,
     title: "Member Organisation",
     description:
-      "Structured registration, official membership cards, QR-coded motorbike tags, and a formal identity — giving riders a seat at the table.",
+      "Organizing and registering boda boda riders and transport SACCOs across the country under one structured, trusted umbrella.",
     bgTheme: "bg-[#00A651]/10 border-[#00A651]/20 text-[#00A651]",
   },
   {
     icon: TrendingUp,
     title: "Economic Empowerment",
     description:
-      "CBD SACCO gives members a savings vehicle and loan access up to 3× savings — no bank account required. Financial freedom from Ksh 1,200/month.",
+      "Creating partnerships with local and international investors, facilitating access to affordable motorcycles, insurance, and financial support.",
     bgTheme: "bg-teal-500/10 border-teal-500/20 text-teal-400",
   },
   {
     icon: BookOpen,
-    title: "Training & Development",
+    title: "Training & Safety",
     description:
-      "Professional programs improving rider safety, road conduct, customer service standards, and long-term career prospects.",
+      "Promoting road safety, professional conduct, and training programs to improve rider standards and long-term career prospects.",
     bgTheme: "bg-amber-500/10 border-amber-500/20 text-amber-400",
   },
   {
     icon: Heart,
     title: "Community Building",
     description:
-      "A trusted network across Nairobi where riders support, protect, and grow alongside one another — from Githurai to Njiru.",
+      "Strengthening cooperation between riders, SACCOs, investors, government agencies, and development partners — one voice for the industry.",
     bgTheme: "bg-rose-500/10 border-rose-500/20 text-rose-400",
   },
 ];
 
+const PLAN_ITEMS = [
+  { icon: Users,      text: "Organize and register boda boda riders and transport SACCOs across the country." },
+  { icon: Handshake,  text: "Create partnerships with local and international investors for the benefit of riders and transport businesses." },
+  { icon: Shield,     text: "Promote road safety, training, and professional conduct among riders." },
+  { icon: Wallet,     text: "Facilitate access to affordable motorcycles, insurance services, and financial support." },
+  { icon: Megaphone,  text: "Advocate for the rights and welfare of boda boda riders at county and national levels." },
+  { icon: Globe,      text: "Strengthen cooperation between riders, SACCOs, investors, government agencies, and development partners." },
+  { icon: Bike,       text: "Create employment and business opportunities within the transport sector." },
+  { icon: Star,       text: "Establish a strong national platform that speaks with one voice for the boda boda industry." },
+];
+
+const REPRESENTATION = [
+  "All Boda Boda Riders",
+  "All Registered Boda Boda SACCOs",
+  "Boda Boda Transport Associations",
+  "Transport Stakeholders",
+  "Local Investors",
+  "International Investors",
+  "Youth and Women Groups involved in Transport Business",
+];
+
 const LEADERSHIP_TEAM = [
   {
-    name: "John Njeru",
-    role: "Executive Chairman",
+    name: "Hon. John Njeru",
+    role: "National Chairman",
     responsibility:
-      "Strategic direction, government and county relations, and overall vision execution for UBTA across all Nairobi nodes.",
+      "Strategic direction, government and county relations, and overall vision execution for UBTA across all national nodes.",
     image: "/leadership/chairman.jpeg",
   },
   {
@@ -78,7 +100,7 @@ const LEADERSHIP_TEAM = [
     name: "Ruth",
     role: "General Secretary",
     responsibility:
-      "Oversight of capital reserves, monthly member contributions, CBD SACCO compliance, and loan disbursement systems.",
+      "Oversight of capital reserves, monthly member contributions, CBD SACCO compliance, and member welfare systems.",
     image: "/leadership/treasurer.jpeg",
   },
 ];
@@ -110,7 +132,6 @@ const TIMELINE_EVENTS = [
   },
 ];
 
-// Split benefits clearly between UBTA and SACCO
 const UBTA_BENEFITS = [
   "Official UBTA membership card & number",
   "Motorbike QR code for identification",
@@ -132,9 +153,9 @@ const SACCO_BENEFITS = [
 ];
 
 const LOCATIONS = [
-  { name: "Githurai 45", detail: "Northern Nairobi Terminal" },
-  { name: "Ngara – Fig Tree", detail: "Central Nairobi, Fig Tree Flyover" },
-  { name: "Njiru – Kangundo Road", detail: "Eastern Nairobi, Njiru Shopping Centre" },
+  { name: "Githurai 45",          detail: "Northern Nairobi Terminal" },
+  { name: "Ngara – Fig Tree",     detail: "Central Nairobi, Fig Tree Flyover" },
+  { name: "Njiru – Kangundo Road",detail: "Eastern Nairobi, Njiru Shopping Centre" },
 ];
 
 const MEMBERSHIP_OPTIONS = [
@@ -197,24 +218,20 @@ export default function AboutPage() {
               <span className="text-[#F37121]">Leadership</span>
             </h1>
             <p className="text-slate-300 text-base sm:text-lg leading-relaxed max-w-2xl mb-8 [text-shadow:_0_2px_4px_rgba(0,0,0,0.6)]">
-              United Boda Transport Association was built for one reason. To give boda boda
-              riders the structure, support, and financial opportunities they deserve.
-              We are a movement driven by accountability-first leadership, backed by
-              CBD SACCO for real financial inclusion.
+              United Boda Transport Association was built for one reason — to unite, empower, and represent
+              all boda boda riders, transport SACCOs, and transport stakeholders by promoting professionalism,
+              economic growth, road safety, and sustainable investment opportunities within the boda boda
+              transport sector.
             </p>
             <div className="flex flex-wrap gap-4">
-              <Link
-                href="/register"
+              <Link href="/register"
                 className="bg-[#F37121] hover:bg-[#d65f17] text-white inline-flex items-center gap-2
-                           font-black text-sm px-6 py-3.5 rounded-xl transition-all shadow-lg shadow-[#F37121]/20"
-              >
+                           font-black text-sm px-6 py-3.5 rounded-xl transition-all shadow-lg shadow-[#F37121]/20">
                 Become a Member <ArrowRight size={16} />
               </Link>
-              <Link
-                href="/sacco"
+              <Link href="/sacco"
                 className="border border-gray-700 hover:border-[#F37121] text-white inline-flex items-center gap-2
-                           font-black text-sm px-6 py-3.5 rounded-xl transition-all bg-slate-950/40"
-              >
+                           font-black text-sm px-6 py-3.5 rounded-xl transition-all bg-slate-950/40">
                 Explore CBD SACCO
               </Link>
             </div>
@@ -252,10 +269,10 @@ export default function AboutPage() {
                   </div>
                   <span className="font-black text-white text-xs uppercase tracking-widest">Our Mission</span>
                 </div>
-                <p className="text-white text-xl lg:text-2xl font-black leading-snug [text-shadow:_0_2px_8px_rgba(0,0,0,0.4)]">
-                  To create a more professional and sustainable boda boda industry by supporting,
-                  uniting, and empowering riders through structured leadership and financial growth
-                  via CBD SACCO.
+                <p className="text-white text-base lg:text-lg font-black leading-snug [text-shadow:_0_2px_8px_rgba(0,0,0,0.4)]">
+                  To unite, empower, and represent all boda boda riders, transport SACCOs, and transport
+                  stakeholders by promoting professionalism, economic growth, road safety, and sustainable
+                  investment opportunities within the boda boda transport sector.
                 </p>
               </div>
             </div>
@@ -271,10 +288,94 @@ export default function AboutPage() {
                   </div>
                   <span className="font-black text-gray-300 text-xs uppercase tracking-widest">Our Vision</span>
                 </div>
-                <p className="text-white text-xl lg:text-2xl font-black leading-snug [text-shadow:_0_2px_12px_rgba(0,0,0,0.9)]">
-                  To provide reliable, safe, and tech-driven transport solutions while becoming
-                  Kenya's most trusted boda boda SACCO — enhancing member welfare at every step.
+                <p className="text-white text-base lg:text-lg font-black leading-snug [text-shadow:_0_2px_12px_rgba(0,0,0,0.9)]">
+                  To become the leading and most trusted national organization representing boda boda riders,
+                  SACCOs, and transport investors — creating a modern, organized, and prosperous transport
+                  industry in Kenya and beyond.
                 </p>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </section>
+
+      {/* ── OUR PLAN ──────────────────────────────────────────── */}
+      <section className="py-20 lg:py-24 bg-[#111827]/30 border-b border-gray-800/40">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-14">
+            <p className="text-[#F37121] text-xs font-black uppercase tracking-widest mb-3">Strategic roadmap</p>
+            <h2 className="text-white font-black text-3xl lg:text-4xl uppercase tracking-tight mb-4">
+              Our Plan
+            </h2>
+            <p className="text-gray-400 max-w-xl mx-auto text-sm font-medium leading-relaxed">
+              Eight clear commitments that drive everything UBTA does — from grassroots rider registration
+              to national-level advocacy and international investment partnerships.
+            </p>
+          </div>
+
+          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4 max-w-6xl mx-auto">
+            {PLAN_ITEMS.map((item, idx) => {
+              const Icon = item.icon;
+              return (
+                <div key={idx} className="bg-[#0B0F19] border border-gray-800/80 rounded-2xl p-5 flex gap-4">
+                  <div className="w-9 h-9 rounded-xl bg-[#F37121]/10 flex items-center justify-center shrink-0 mt-0.5">
+                    <Icon size={16} className="text-[#F37121]" />
+                  </div>
+                  <p className="text-gray-300 text-xs leading-relaxed font-medium">{item.text}</p>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      </section>
+
+      {/* ── REPRESENTATION ────────────────────────────────────── */}
+      <section className="py-20 lg:py-24 bg-[#0B0F19] border-b border-gray-800/40">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="grid lg:grid-cols-2 gap-12 items-center">
+
+            <div>
+              <p className="text-[#F37121] text-xs font-black uppercase tracking-widest mb-3">Who we represent</p>
+              <h2 className="text-white font-black text-3xl lg:text-4xl uppercase tracking-tight mb-6">
+                One Voice for the<br />Boda Boda Industry
+              </h2>
+              <p className="text-gray-400 text-sm leading-relaxed mb-8">
+                UBTA is organizing and bringing together representatives from every corner of the
+                boda boda transport ecosystem — riders, SACCOs, investors, and community groups —
+                under one united national platform.
+              </p>
+              <div className="space-y-3">
+                {REPRESENTATION.map((item, idx) => (
+                  <div key={idx} className="flex items-center gap-3 bg-[#111827]/60 border border-gray-800 rounded-xl p-3.5">
+                    <div className="w-6 h-6 rounded-lg bg-[#F37121] flex items-center justify-center text-white font-black text-[10px] shrink-0">
+                      {idx + 1}
+                    </div>
+                    <span className="text-gray-300 text-sm font-semibold">{item}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Chairman quote card */}
+            <div className="bg-[#111827] border border-gray-800 rounded-2xl p-8 shadow-2xl relative overflow-hidden">
+              <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-[#F37121] via-[#00A651] to-[#F37121]" />
+              <div className="absolute top-6 right-6 text-8xl font-black text-[#F37121]/10 leading-none select-none">"</div>
+              <p className="text-white text-base lg:text-lg font-semibold leading-relaxed mb-8 relative z-10">
+                Together for Unity, Growth, Investment, and Prosperity in the Boda Boda Transport Industry.
+              </p>
+              <div className="flex items-center gap-4 pt-6 border-t border-gray-800">
+                <div className="w-14 h-14 rounded-full bg-[#0B0F19] border-2 border-[#F37121]/30 overflow-hidden flex items-center justify-center shrink-0">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img src="/leadership/chairman.jpeg" alt="Hon. John Njeru"
+                    className="w-full h-full object-cover"
+                    onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }} />
+                </div>
+                <div>
+                  <p className="font-black text-white text-sm uppercase tracking-tight">Hon. John Njeru</p>
+                  <p className="text-[#F37121] text-xs font-bold mt-0.5">National Chairman</p>
+                  <p className="text-gray-500 text-xs">United Boda Transport Association</p>
+                </div>
               </div>
             </div>
 
@@ -294,8 +395,7 @@ export default function AboutPage() {
             </h2>
             <p className="text-gray-400 max-w-xl mx-auto text-sm font-medium leading-relaxed">
               You can join UBTA as an association member, join CBD SACCO as a cooperative member,
-              or do both. Each has a registration fee of Ksh 1,000 and a monthly office management
-              fee of Ksh 200.
+              or do both. Registration fee of Ksh 1,000 per membership.
             </p>
           </div>
 
@@ -335,14 +435,13 @@ export default function AboutPage() {
             })}
           </div>
 
-          {/* SACCO affiliate callout */}
           <div className="mt-8 max-w-5xl mx-auto bg-[#0B0F19] border border-gray-800 rounded-2xl p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
             <div className="flex items-center gap-4">
               <div className="w-10 h-10 rounded-xl bg-teal-500/10 flex items-center justify-center shrink-0">
                 <Building2 size={18} className="text-teal-400" />
               </div>
               <div>
-                <p className="text-white font-bold text-sm">Are you an existing SACCO?</p>
+                <p className="text-white font-bold text-sm">Are you an existing SACCO or transport organisation?</p>
                 <p className="text-gray-500 text-xs mt-0.5">SACCOs and transport organisations can apply to affiliate under UBTA. Affiliation fees are under discussion.</p>
               </div>
             </div>
@@ -409,7 +508,7 @@ export default function AboutPage() {
             </h2>
             <p className="text-gray-400 max-w-xl mx-auto text-sm font-medium">
               Everything we do flows from these five commitments to our members and the wider
-              boda boda community across Nairobi and beyond.
+              boda boda community across Kenya and beyond.
             </p>
           </div>
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6">
@@ -443,20 +542,20 @@ export default function AboutPage() {
                 </h2>
               </div>
               <p className="text-gray-300 leading-relaxed text-sm sm:text-base font-medium">
-                UBTA was born out of a simple truth; boda boda riders are the backbone of
+                UBTA was born out of a simple truth — boda boda riders are the backbone of
                 urban transport in Kenya, yet they remain among the most underserved workers
                 in the economy. No formal representation. No financial access. No structure.
               </p>
               <p className="text-gray-300 leading-relaxed text-sm sm:text-base font-medium">
                 We changed that. Starting in Nairobi, UBTA brings riders under a single
-                organised umbrella, giving them identity, advocacy, and a real path to
+                organised umbrella — giving them identity, advocacy, and a real path to
                 financial growth. CBD SACCO was the next step: a fully registered co-operative
                 where members save monthly and access loans up to 3× their savings, with no
                 bank account required.
               </p>
               <p className="text-gray-300 leading-relaxed text-sm sm:text-base font-medium">
                 Today, our agent network spans Githurai 45, Ngara, and Njiru — with more
-                locations planned as membership grows.
+                locations planned as membership grows across Kenya.
               </p>
               <div className="relative w-full h-64 rounded-xl overflow-hidden border border-gray-800 shadow-2xl group bg-[#111827]">
                 <div className="absolute inset-0 bg-cover bg-center opacity-70 group-hover:opacity-90 transition-opacity duration-300 z-10"
@@ -491,7 +590,7 @@ export default function AboutPage() {
         </div>
       </section>
 
-      {/* ── BENEFITS — UBTA vs SACCO ───────────────────────────── */}
+      {/* ── BENEFITS ──────────────────────────────────────────── */}
       <section className="py-20 lg:py-24 bg-[#0B0F19] border-b border-gray-800/60">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-14">
@@ -502,8 +601,6 @@ export default function AboutPage() {
           </div>
 
           <div className="grid lg:grid-cols-2 gap-8 max-w-5xl mx-auto">
-
-            {/* UBTA benefits */}
             <div className="bg-[#111827]/60 border border-[#F37121]/20 rounded-2xl p-6 lg:p-8">
               <div className="flex items-center gap-3 mb-6">
                 <div className="w-10 h-10 rounded-xl bg-[#F37121]/10 flex items-center justify-center">
@@ -511,7 +608,7 @@ export default function AboutPage() {
                 </div>
                 <div>
                   <h3 className="font-black text-white text-sm uppercase tracking-tight">UBTA Association</h3>
-                  <p className="text-[#F37121] text-[11px] font-bold">Ksh 1,200 to join</p>
+                  <p className="text-[#F37121] text-[11px] font-bold">Ksh 1,000 registration</p>
                 </div>
               </div>
               <div className="grid sm:grid-cols-2 gap-3">
@@ -524,7 +621,6 @@ export default function AboutPage() {
               </div>
             </div>
 
-            {/* SACCO benefits */}
             <div className="bg-[#111827]/60 border border-teal-500/20 rounded-2xl p-6 lg:p-8">
               <div className="flex items-center gap-3 mb-6">
                 <div className="w-10 h-10 rounded-xl bg-teal-500/10 flex items-center justify-center">
@@ -543,7 +639,6 @@ export default function AboutPage() {
                   </div>
                 ))}
               </div>
-              {/* Loan calculator strip */}
               <div className="bg-[#0B0F19] border border-teal-500/20 rounded-xl p-4">
                 <p className="text-teal-400 text-[10px] font-black uppercase tracking-widest mb-3">Loan potential</p>
                 <div className="grid grid-cols-3 gap-2">
@@ -600,7 +695,6 @@ export default function AboutPage() {
                 0714 314 342
               </a>
               <p className="text-gray-400 text-xs font-medium mb-6">Call or WhatsApp · Mon to Sat, 8am–6pm</p>
-
               <div className="space-y-3">
                 <a href="https://wa.me/254714314342?text=Hello%20UBTA"
                   target="_blank" rel="noopener noreferrer"
@@ -614,7 +708,6 @@ export default function AboutPage() {
                   Register as a Member <ArrowRight size={15} />
                 </Link>
               </div>
-
               <div className="mt-6 pt-6 border-t border-gray-800 grid grid-cols-2 gap-4 text-center">
                 <div>
                   <div className="font-black text-white text-xl">500+</div>
@@ -639,8 +732,8 @@ export default function AboutPage() {
             Be part of the movement
           </h2>
           <p className="text-orange-100 max-w-xl mx-auto mb-8 text-sm sm:text-base font-medium leading-relaxed">
-            Over 500 riders have already taken the step. Register today for advocacy,
-            fleet identification, and financial backing through CBD SACCO, from Ksh 1,200.
+            Join hundreds of riders, SACCOs, and transport stakeholders already building
+            Kenya's most trusted boda boda industry — together.
           </p>
           <div className="flex flex-wrap gap-4 justify-center">
             <Link href="/register"
