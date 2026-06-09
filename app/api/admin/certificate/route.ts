@@ -73,28 +73,41 @@ export async function POST(req: NextRequest) {
     // ── 2. Generate HTML ──────────────────────────────────────────────────────
     const html = generateCertificateHTML(certData);
 
-    // ── 3. Render PDF ─────────────────────────────────────────────────────────
+    // ── 3. Render PDF ─────────────────────────────────────────────────────────────
     let pdfBuffer: Buffer;
 
     try {
-      // Use @sparticuz/chromium-min which downloads binary at runtime
-      // This avoids the bundler binary path issue on Vercel
-      const chromium = await import("@sparticuz/chromium");
       const { launch } = await import("puppeteer-core") as { launch: Function };
 
-      const executablePath = await chromium.default.executablePath(
-        "https://github.com/Sparticuz/chromium/releases/download/v121.0.0/chromium-v121.0.0-pack.tar"
-      );
+      const isVercel = !!process.env.VERCEL;
+      let executablePath: string;
+
+      if (isVercel) {
+        const chromium = await import("@sparticuz/chromium");
+        executablePath = await chromium.default.executablePath(
+          "https://github.com/Sparticuz/chromium/releases/download/v121.0.0/chromium-v121.0.0-pack.tar"
+        );
+      } else {
+        executablePath = "/usr/bin/google-chrome";
+      }
 
       const browser = await launch({
-        args:            chromium.default.args,
-        defaultViewport: { width: 1122, height: 794 },
         executablePath,
-        headless:        true,
+        args: [
+          "--no-sandbox",
+          "--disable-setuid-sandbox",
+          "--disable-dev-shm-usage",
+          "--disable-gpu",
+          "--no-first-run",
+          "--no-zygote",
+          "--single-process",
+        ],
+        defaultViewport: { width: 1122, height: 794 },
+        headless: true,
       });
 
       const page = await browser.newPage();
-      await page.setContent(html, { waitUntil: "load" });
+      await page.setContent(html, { waitUntil: "networkidle0" });
       await new Promise((r) => setTimeout(r, 1500));
 
       const pdf = await page.pdf({
