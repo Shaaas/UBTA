@@ -39,7 +39,8 @@ export function generateCertificateHTML(data: CertificateData): string {
 <head>
 <meta charset="UTF-8" />
 <title>UBTA Certificate — ${data.fullName}</title>
-<link href="https://fonts.googleapis.com/css2?family=Raleway:wght@700;900&family=Montserrat:wght@400;600;700;900&family=Playfair+Display:wght@700&display=swap" rel="stylesheet" />
+<link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@700&family=Montserrat:wght@400;600;700;900&family=Playfair+Display:wght@700&display=swap" rel="stylesheet" />
+<style>
   * { margin:0; padding:0; box-sizing:border-box; }
   body {
     width:1122px; height:794px;
@@ -208,7 +209,7 @@ export function generateCertificateHTML(data: CertificateData): string {
   /* Member name */
   .member-name {
     font-family:'Raleway', sans-serif;
-    font-size:46px; font-weight:900; color:#111;
+    font-size:46px; font-weight:700; color:#111;
     text-align:center; line-height:1; margin-bottom:7px;
   }
 
