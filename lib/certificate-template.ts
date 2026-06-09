@@ -33,8 +33,6 @@ export function generateCertificateHTML(data: CertificateData): string {
   const membershipLabel = formatMembershipType(data.membershipType);
   const dateLabel       = formatDate(data.dateJoined);
   const memberId        = `UBTA${data.memberNumber}`;
-  const sigSrc          = CHAIRPERSON_SIG;
-  const sigSrc          = CHAIRPERSON_SIG;
 
   return `<!DOCTYPE html>
 <html lang="en">
@@ -357,7 +355,7 @@ export function generateCertificateHTML(data: CertificateData): string {
       <div class="sig-section">
         <div class="sig-block">
           <div class="sig-img-wrap">
-            <img src="${sigSrc}" alt="Chairperson signature" />
+            <img src="https://ubta.co.ke/chairperson.jpeg" alt="Chairperson signature" />
           </div>
           <div class="sig-line"></div>
           <div class="sig-label">Chairperson</div>
