@@ -27,6 +27,20 @@ async function verifyAdmin(req: NextRequest) {
 
 export const maxDuration = 60;
 
+let browserInstance: any = null;
+
+async function getBrowser() {
+  if (browserInstance) return browserInstance;
+  const { launch } = await import("puppeteer-core") as { launch: Function };
+  browserInstance = await launch({
+    executablePath: process.env.VERCEL ? undefined : "/usr/bin/google-chrome",
+    args: ["--no-sandbox","--disable-setuid-sandbox","--disable-dev-shm-usage","--disable-gpu","--no-first-run","--no-zygote"],
+    defaultViewport: { width: 1122, height: 794 },
+    headless: true,
+  });
+  return browserInstance;
+}
+
 export async function POST(req: NextRequest) {
   const admin = await verifyAdmin(req);
   if (!admin) {
