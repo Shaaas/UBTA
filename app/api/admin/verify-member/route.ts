@@ -22,7 +22,6 @@ async function verifyAdmin(req: NextRequest) {
   }
 }
 
-// POST — verify a member manually after payment confirmed
 export async function POST(req: NextRequest) {
   const admin = await verifyAdmin(req);
   if (!admin) {
@@ -32,11 +31,8 @@ export async function POST(req: NextRequest) {
   try {
     const { memberId, mpesaReceipt, amount } = await req.json();
 
-    if (!memberId || !mpesaReceipt) {
-      return NextResponse.json(
-        { error: "memberId and mpesaReceipt are required" },
-        { status: 400 }
-      );
+    if (!memberId) {
+      return NextResponse.json({ error: "memberId is required" }, { status: 400 });
     }
 
     // Update member status
@@ -49,27 +45,52 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: profileError.message }, { status: 500 });
     }
 
-    // Update transaction with real receipt
-    const { error: txError } = await supabase
-      .from("transactions")
-      .update({
-        mpesa_receipt_number: mpesaReceipt,
-        transaction_type:     "member_registration_paid",
-        amount:               amount ?? 1200,
-      })
-      .eq("profile_id", memberId);
+    // Only handle transaction if receipt provided
+    if (mpesaReceipt) {
+      // Try to update existing transaction first
+      const { data: existingTx } = await supabase
+        .from("transactions")
+        .select("id")
+        .eq("profile_id", memberId)
+        .single();
 
-    if (txError) {
-      console.error("Transaction update error:", txError.message);
+      if (existingTx) {
+        // Update existing transaction
+        await supabase
+          .from("transactions")
+          .update({
+            mpesa_receipt_number: mpesaReceipt,
+            transaction_type:     "member_registration_paid",
+            amount:               amount ?? 1200,
+          })
+          .eq("profile_id", memberId);
+      } else {
+        // Create new transaction for manually added members
+        await supabase
+          .from("transactions")
+          .insert({
+            profile_id:           memberId,
+            mpesa_receipt_number: mpesaReceipt,
+            transaction_type:     "member_registration_paid",
+            amount:               amount ?? 1200,
+          });
+      }
+    } else {
+      // No receipt — create a manual verification transaction
+      await supabase
+        .from("transactions")
+        .insert({
+          profile_id:           memberId,
+          mpesa_receipt_number: "MANUAL",
+          transaction_type:     "member_registration_paid",
+          amount:               amount ?? 1200,
+        });
     }
 
     return NextResponse.json({ success: true });
 
   } catch (err: unknown) {
     console.error("Verify member error:", err);
-    return NextResponse.json(
-      { error: "Internal server error" },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }

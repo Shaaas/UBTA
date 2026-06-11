@@ -614,7 +614,7 @@ function VerifyModal({ member, onClose, onDone }: {
                              text-sm font-mono focus:outline-none focus:border-green-500/60 transition-all" />
               </div>
 
-              <button onClick={handleVerify} disabled={loading || !receipt}
+              <button onClick={handleVerify} disabled={loading}
                 className="w-full bg-green-600 hover:bg-green-500 disabled:opacity-50 disabled:cursor-not-allowed
                            text-white font-bold uppercase tracking-wide py-3.5 rounded-xl transition-all
                            flex items-center justify-center gap-2 text-sm">
