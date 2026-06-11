@@ -49,7 +49,7 @@ export async function GET(req: NextRequest) {
       )
     `, { count: "exact" })
     .eq("status", status)
-    .order("created_at", { ascending: false })
+    .order("member_number", { ascending: false })
     .range(offset, offset + limit - 1);
 
   if (search) {
