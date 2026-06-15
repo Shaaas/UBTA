@@ -1,11 +1,11 @@
 "use client";
 
 import { useState } from "react";
-import { Search, CheckCircle2, XCircle, User, Phone, CreditCard, Hash, Loader2 } from "lucide-react";
+import { Search, CheckCircle2, XCircle, User, Hash, Loader2 } from "lucide-react";
 
-const SHEET_ID = "1SJevrYGlncKKDXeRcHZUEXHfshKIEk84pYZpyWYZ5pI"; // 🔁 Replace with your actual Sheet ID
-const SHEET_NAME = "Registered members"
-const SHEET_GID = "1494404164";           // 🔁 Change if your sheet tab has a different name
+const SHEET_ID = "1SJevrYGlncKKDXeRcHZUEXHfshKIEk84pYZpyWYZ5pI";
+const SHEET_NAME = "Registered members";
+const SHEET_GID = "1494404164";
 
 type Member = {
   ubtaNo: string;
@@ -37,13 +37,11 @@ export default function VerifyPage() {
       const res = await fetch(url);
       const text = await res.text();
 
-      // Strip Google's JSONP wrapper
       const json = JSON.parse(text.replace(/^[^{]*/, "").replace(/[^}]*$/, ""));
       const rows = json.table.rows;
 
       const match = rows.find((row: any) => {
         const ubtaNo = String(row.c[0]?.v ?? "");
-        const name   = String(row.c[1]?.v ?? "");
         const idNo   = String(row.c[2]?.v ?? "");
         const phone  = String(row.c[3]?.v ?? "");
 
@@ -157,7 +155,7 @@ export default function VerifyPage() {
               </div>
             </div>
 
-            {/* Details */}
+            {/* Details — UBTA Number and Name only */}
             <div className="p-6 space-y-4">
               <div className="flex items-center gap-3">
                 <div className="w-9 h-9 rounded-lg bg-slate-800 flex items-center justify-center shrink-0">
@@ -178,31 +176,11 @@ export default function VerifyPage() {
                   <p className="text-white font-bold text-base">{result.name}</p>
                 </div>
               </div>
-
-              <div className="flex items-center gap-3">
-                <div className="w-9 h-9 rounded-lg bg-slate-800 flex items-center justify-center shrink-0">
-                  <CreditCard size={14} className="text-slate-400" />
-                </div>
-                <div>
-                  <p className="text-[10px] text-slate-500 uppercase font-bold tracking-widest">ID Number</p>
-                  <p className="text-slate-300 font-mono">{result.idNo}</p>
-                </div>
-              </div>
-
-              <div className="flex items-center gap-3">
-                <div className="w-9 h-9 rounded-lg bg-slate-800 flex items-center justify-center shrink-0">
-                  <Phone size={14} className="text-slate-400" />
-                </div>
-                <div>
-                  <p className="text-[10px] text-slate-500 uppercase font-bold tracking-widest">Phone</p>
-                  <p className="text-slate-300 font-mono">{result.phone}</p>
-                </div>
-              </div>
             </div>
 
             <div className="px-6 pb-5">
               <div className="bg-slate-950/60 border border-slate-800 rounded-xl px-4 py-3 text-xs text-slate-500 text-center">
-                Savings balance is private and only accessible to the member directly.
+                Personal details are private and only accessible to the member directly.
               </div>
             </div>
           </div>
