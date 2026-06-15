@@ -1,17 +1,17 @@
 "use client";
 
 import { useState } from "react";
+import { createBrowserClient } from "@supabase/ssr";
 import { Search, CheckCircle2, XCircle, User, Hash, Loader2 } from "lucide-react";
 
-const SHEET_ID = "1SJevrYGlncKKDXeRcHZUEXHfshKIEk84pYZpyWYZ5pI";
+const SHEET_ID  = "1SJevrYGlncKKDXeRcHZUEXHfshKIEk84pYZpyWYZ5pI";
 const SHEET_NAME = "Registered members";
-const SHEET_GID = "1494404164";
+const SHEET_GID  = "1494404164";
 
 type Member = {
   ubtaNo: string;
   name: string;
-  idNo: string;
-  phone: string;
+  source: "supabase" | "sheets";
 };
 
 function normalize(val: string) {
@@ -19,10 +19,15 @@ function normalize(val: string) {
 }
 
 export default function VerifyPage() {
-  const [query, setQuery] = useState("");
+  const [query, setQuery]   = useState("");
   const [result, setResult] = useState<Member | null | "not_found">(null);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError]   = useState<string | null>(null);
+
+  const supabase = createBrowserClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+  );
 
   const handleSearch = async () => {
     const q = query.trim();
@@ -33,19 +38,36 @@ export default function VerifyPage() {
     setError(null);
 
     try {
-      const url = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json&sheet=${encodeURIComponent(SHEET_NAME)}&gid=${SHEET_GID}`;
-      const res = await fetch(url);
-      const text = await res.text();
+      // ── 1. Search Supabase first ──────────────────────────────────
+      const { data, error: sbError } = await supabase
+        .from("profiles")
+        .select("member_number, full_name, phone_number, id_number")
+        .or(
+          `member_number.eq.${q},phone_number.eq.${q},id_number.eq.${q}`
+        )
+        .maybeSingle();
 
+      if (!sbError && data) {
+        setResult({
+          ubtaNo: String(data.member_number ?? "—"),
+          name:   String(data.full_name ?? "—"),
+          source: "supabase",
+        });
+        return;
+      }
+
+      // ── 2. Fall back to Google Sheets ─────────────────────────────
+      const url = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json&sheet=${encodeURIComponent(SHEET_NAME)}&gid=${SHEET_GID}`;
+      const res  = await fetch(url);
+      const text = await res.text();
       const json = JSON.parse(text.replace(/^[^{]*/, "").replace(/[^}]*$/, ""));
       const rows = json.table.rows;
 
+      const nq = normalize(q);
       const match = rows.find((row: any) => {
         const ubtaNo = String(row.c[0]?.v ?? "");
         const idNo   = String(row.c[2]?.v ?? "");
         const phone  = String(row.c[3]?.v ?? "");
-
-        const nq = normalize(q);
         return (
           normalize(ubtaNo) === nq ||
           normalize(idNo)   === nq ||
@@ -57,12 +79,12 @@ export default function VerifyPage() {
         setResult({
           ubtaNo: String(match.c[0]?.v ?? "—"),
           name:   String(match.c[1]?.v ?? "—"),
-          idNo:   String(match.c[2]?.v ?? "—"),
-          phone:  String(match.c[3]?.v ?? "—"),
+          source: "sheets",
         });
       } else {
         setResult("not_found");
       }
+
     } catch (err) {
       setError("Could not reach the membership database. Please try again.");
     } finally {
@@ -155,7 +177,7 @@ export default function VerifyPage() {
               </div>
             </div>
 
-            {/* Details — UBTA Number and Name only */}
+            {/* Details */}
             <div className="p-6 space-y-4">
               <div className="flex items-center gap-3">
                 <div className="w-9 h-9 rounded-lg bg-slate-800 flex items-center justify-center shrink-0">
