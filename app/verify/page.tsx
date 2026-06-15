@@ -39,14 +39,12 @@ export default function VerifyPage() {
 
     try {
       // ── 1. Search Supabase first ──────────────────────────────────
-      const { data, error: sbError } = await supabase
-        .from("profiles")
-        .select("member_number, full_name, phone_number, id_number")
-        .or(
-          `member_number.eq.${q},phone_number.eq.${q},id_number.eq.${q}`
-        )
-        .maybeSingle();
-
+   const { data, error: sbError } = await supabase
+  .from("public_member_directory")
+  .select("member_number, full_name")
+  .eq("member_number", q)
+  .maybeSingle();
+  
       if (!sbError && data) {
         setResult({
           ubtaNo: String(data.member_number ?? "—"),
