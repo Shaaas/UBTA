@@ -122,7 +122,7 @@ export default function HomePage() {
                 <div className="w-px h-4 bg-gray-700" />
                 <div className="flex items-center gap-2">
                   <span className="text-xs text-gray-400">Paybill:</span>
-                  <span className="text-sm font-black text-white font-mono tracking-wider">247247</span>
+                  <span className="text-sm font-black text-white font-mono tracking-wider">4146697</span>
                 </div>
                 <div className="w-px h-4 bg-gray-700" />
                 <div className="flex items-center gap-2">
@@ -186,7 +186,7 @@ export default function HomePage() {
                 step: "02",
                 color: "#00A651",
                 title: "Pay via M-Pesa",
-                desc: "Send Ksh 1,000 via M-Pesa Paybill 247247, Account 0714314342. Keep your receipt.",
+                desc: "Send Ksh 1,000 via M-Pesa Paybill 4146697, Account 0714314342. Keep your receipt.",
                 icon: "📱",
                 cta: null,
               },
