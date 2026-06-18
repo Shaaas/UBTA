@@ -15,10 +15,6 @@ export default function HomePage() {
       <div className="absolute inset-0 bg-gradient-to-r from-[#0B0F19] via-[#0B0F19]/80 to-transparent pointer-events-none z-0" />
       <div className="absolute inset-0 bg-gradient-to-t from-[#0B0F19] via-transparent to-[#0B0F19]/40 pointer-events-none z-0" />
 
-      <div className="w-full h-[3px] flex sticky top-[73px] z-40">
-        <div className="bg-[#F37121] h-full flex-grow" />
-        <div className="bg-[#00A651] h-full flex-grow" />
-      </div>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 py-16 md:py-20 w-full relative z-10">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center w-full">

@@ -136,6 +136,7 @@ export default function Navbar() {
           </div>
         )}
       </nav>
+      <div className="w-full h-[3px] flex"><div className="bg-[#F37121] h-full flex-grow" /><div className="bg-[#00A651] h-full flex-grow" /></div>
     </>
   );
 }
