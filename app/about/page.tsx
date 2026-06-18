@@ -86,23 +86,38 @@ const LEADERSHIP_TEAM = [
     name: "Hon. John Njeru",
     role: "National Chairman",
     responsibility:
-      "Strategic direction, government and county relations, and overall vision execution for UBTA across all national nodes.",
-    image: "/leadership/chairman.jpeg",
+      "Provides overall strategic leadership for UBTA, represents the association in government and county engagements, and ensures national level vision and policy direction are implemented.",
+    image: "/chairman.jpeg",
   },
   {
     name: "Samuel Ndegwa Mugo",
-    role: "Vice Chairman",
+    role: "Deputy Chairman",
     responsibility:
-      "Operations management, member registration systems, document compliance, and institutional partnerships.",
-    image: "/leadership/secretary.jpeg",
+      "Supports the Chairman in leadership and coordination of UBTA operations, oversees internal systems including member registration and documentation processes, and assists in institutional relationships and compliance matters.",
+    image: "/deputy.jpeg",
   },
   {
-    name: "Ruth",
+    name: "Ruth Wangui Kariuki",
     role: "General Secretary",
     responsibility:
-      "Oversight of capital reserves, monthly member contributions, CBD SACCO compliance, and member welfare systems.",
-    image: "/leadership/treasurer.jpeg",
+      "Manages UBTA administration including official communication, scheduling and coordination of meetings, preparation and safekeeping of official records, documentation of board decisions, and follow up on implementation of resolutions and organizational policies.",
+    image: "/secretary.jpeg",
   },
+  {
+    name: "Sharon Mutanu",
+    role: "Head of Partnership and Development",
+    responsibility:
+      "Leads external engagement and growth for UBTA including building partnerships with banks, SACCOs, fleet companies, and investors, developing funding and development opportunities, coordinating proposals, and managing stakeholder relationships.",
+    image: "/head.jpeg",
+  },
+  {
+    name: "Joel Simiyu Wamasibili",
+    role: "Treasurer",
+    responsibility:
+      "Oversight of UBTA financial management including member contributions, tracking of funds, budgeting support, financial reporting, and ensuring proper use and accountability of association resources.",
+    image: "/treasurer.jpeg",
+  },
+  
 ];
 
 const TIMELINE_EVENTS = [
@@ -218,7 +233,7 @@ export default function AboutPage() {
               <span className="text-[#F37121]">Leadership</span>
             </h1>
             <p className="text-slate-300 text-base sm:text-lg leading-relaxed max-w-2xl mb-8 [text-shadow:_0_2px_4px_rgba(0,0,0,0.6)]">
-              United Boda Transport Association was built for one reason — to unite, empower, and represent
+              United Boda Transport Association was built for one reason; to unite, empower, and represent
               all boda boda riders, transport SACCOs, and transport stakeholders by promoting professionalism,
               economic growth, road safety, and sustainable investment opportunities within the boda boda
               transport sector.
