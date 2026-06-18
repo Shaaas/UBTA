@@ -135,16 +135,14 @@ export default function HomePage() {
             {/* Right — Logo */}
             <div className="lg:col-span-5 flex justify-center lg:justify-end items-center relative w-full py-8">
               <div className="relative w-72 h-72 sm:w-80 sm:h-80 flex items-center justify-center rounded-full border-[3px] border-[#F37121]/30 bg-[#0B0F19]/40 backdrop-blur-xl group hover:border-[#F37121]/60 transition-all duration-300 shadow-2xl shadow-black/80">
-                <div className="absolute inset-4 rounded-full border border-gray-800/80 bg-[#0B0F19]/95 flex flex-col items-center justify-center overflow-hidden">
-                  <Image
-                    src="/logo.jpeg"
-                    alt="UBTA Logo"
-                    width={240}
-                    height={240}
-                    className="object-contain p-4 w-full h-full group-hover:scale-105 transition-transform duration-300"
-                    priority
-                  />
-                </div>
+                <div className="absolute inset-4 rounded-full border border-gray-800/80 bg-[#0B0F19]/95 flex flex-col items-center justify-center p-6 text-center shadow-2xl">
+  <span className="text-4xl font-black text-[#F37121] tracking-tight mb-1 group-hover:scale-105 transition-transform duration-300">
+    UBTA
+  </span>
+  <span className="text-[11px] font-bold text-gray-400 tracking-normal max-w-[140px] leading-tight">
+    United Boda Transport Assoc.
+  </span>
+</div>
                 <div className="absolute bottom-6 right-2 sm:right-4 inline-flex items-center gap-1 px-3 py-1 bg-[#00A651] text-white rounded-full font-black text-[10px] uppercase tracking-wider shadow-md">
                   CBD SACCO <span>✓</span>
                 </div>
