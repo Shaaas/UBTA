@@ -246,27 +246,57 @@ export default function HomePage() {
                 Check Your Membership Status →
               </Link>
             </div>
-            <div className="relative rounded-2xl overflow-hidden border border-gray-800 shadow-2xl shadow-black/60 bg-[#111827] flex items-center justify-center p-4 min-h-[220px]">
-              <Image
-                src="/certificate-preview.png"
-                alt="UBTA Membership Certificate Preview"
-                width={600}
-                height={400}
-                className="rounded-xl object-contain w-full"
-                onError={(e) => {
-                  // fallback if no preview image
-                  (e.target as HTMLImageElement).style.display = "none";
-                }}
-              />
-              {/* Fallback content if no preview image */}
-              <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 p-8">
-                <div className="w-16 h-16 rounded-full bg-[#F37121]/10 border border-[#F37121]/30 flex items-center justify-center">
-                  <span className="text-2xl">🏆</span>
-                </div>
-                <p className="text-white font-black text-lg text-center">Official UBTA Certificate</p>
-                <p className="text-gray-500 text-xs text-center">Landscape PDF · Personalized · WhatsApp delivery</p>
-              </div>
-            </div>
+           <div className="relative rounded-2xl overflow-hidden border border-gray-800 shadow-2xl shadow-black/60 bg-[#111827] p-6 min-h-[220px]">
+  {/* Mock certificate */}
+  <div className="border-2 border-[#F37121]/40 rounded-xl p-4 bg-[#0B0F19] h-full flex flex-col gap-3">
+    <div className="flex items-center justify-between">
+      <div className="flex items-center gap-2">
+        <div className="w-10 h-10 rounded-full bg-[#F37121]/10 border border-[#F37121]/30 flex items-center justify-center">
+          <span className="text-xs font-black text-[#F37121]">UBTA</span>
+        </div>
+        <div>
+          <p className="text-[10px] font-black text-white">CBD UNITED BODA TRANSPORT</p>
+          <p className="text-[9px] text-gray-500">CO-OPERATIVE SOCIETY LIMITED</p>
+        </div>
+      </div>
+      <div className="w-10 h-10 rounded-full bg-gradient-to-br from-yellow-400 to-yellow-700 flex items-center justify-center">
+        <span className="text-[8px] font-black text-white text-center leading-tight">UBTA<br/>✓</span>
+      </div>
+    </div>
+    <div className="border-t border-b border-[#F37121]/20 py-2 text-center">
+      <p className="text-base font-black text-white tracking-widest uppercase">Certificate</p>
+      <p className="text-[9px] text-gray-400 tracking-widest">— OF MEMBERSHIP —</p>
+    </div>
+    <div className="text-center">
+      <p className="text-[9px] text-gray-400 uppercase tracking-widest">This is to certify that</p>
+      <p className="text-lg font-black text-white mt-1">John Doe Rider</p>
+    </div>
+    <p className="text-[9px] text-gray-400 text-center leading-relaxed">
+      is a registered member of CBD United Boda Transport Co-Operative Society Limited (<span className="text-[#F37121]">UBTA</span>)
+    </p>
+    <div className="grid grid-cols-2 gap-2 mt-auto">
+      <div className="bg-[#111827] rounded-lg p-2">
+        <p className="text-[8px] text-gray-500 uppercase">Member ID</p>
+        <p className="text-xs font-black text-[#F37121]">UBTA3921</p>
+      </div>
+      <div className="bg-[#111827] rounded-lg p-2">
+        <p className="text-[8px] text-gray-500 uppercase">Date Joined</p>
+        <p className="text-xs font-black text-white">18 Jun 2026</p>
+      </div>
+    </div>
+    <div className="flex items-center justify-between mt-1">
+      <div className="w-16 border-t border-gray-600 pt-1">
+        <p className="text-[8px] text-gray-500">Chairperson</p>
+      </div>
+      <div className="w-8 h-8 rounded-full bg-gradient-to-br from-yellow-400 to-yellow-700 flex items-center justify-center">
+        <span className="text-[7px] font-black text-white">SEAL</span>
+      </div>
+    </div>
+  </div>
+  <div className="absolute top-3 right-3 bg-[#F37121]/10 border border-[#F37121]/30 rounded-full px-2 py-0.5">
+    <span className="text-[9px] font-black text-[#F37121]">SAMPLE</span>
+  </div>
+</div>
           </div>
         </div>
       </div>
