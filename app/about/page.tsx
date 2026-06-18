@@ -559,19 +559,19 @@ export default function AboutPage() {
                 </h2>
               </div>
               <p className="text-gray-300 leading-relaxed text-sm sm:text-base font-medium">
-                UBTA was born out of a simple truth — boda boda riders are the backbone of
+                UBTA was born out of a simple truth. Boda boda riders are the backbone of
                 urban transport in Kenya, yet they remain among the most underserved workers
                 in the economy. No formal representation. No financial access. No structure.
               </p>
               <p className="text-gray-300 leading-relaxed text-sm sm:text-base font-medium">
                 We changed that. Starting in Nairobi, UBTA brings riders under a single
-                organised umbrella — giving them identity, advocacy, and a real path to
+                organised umbrella. Giving them identity, advocacy, and a real path to
                 financial growth. CBD SACCO was the next step: a fully registered co-operative
                 where members save monthly and access loans up to 3× their savings, with no
                 bank account required.
               </p>
               <p className="text-gray-300 leading-relaxed text-sm sm:text-base font-medium">
-                Today, our agent network spans Githurai 45, Ngara, and Njiru — with more
+                Today, our agent network spans Githurai 45, Ngara, and Njiru; with more
                 locations planned as membership grows across Kenya.
               </p>
               <div className="relative w-full h-64 rounded-xl overflow-hidden border border-gray-800 shadow-2xl group bg-[#111827]">
