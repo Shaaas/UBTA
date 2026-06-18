@@ -80,7 +80,7 @@ export default function HomePage() {
               </h1>
 
               <p className="text-base sm:text-lg text-gray-300 leading-relaxed font-medium max-w-xl [text-shadow:_0_2px_4px_rgba(0,0,0,0.6)]">
-                UBTA empowers boda boda riders through structured leadership, member welfare, and financial growth via CBD SACCO — Kenya&apos;s most trusted riders&apos; co-operative.
+                UBTA empowers boda boda riders through structured leadership, member welfare, and financial growth via CBD SACCO, Kenya&apos;s most trusted riders&apos; co-operative.
               </p>
 
               {/* Stats row */}
@@ -141,7 +141,7 @@ export default function HomePage() {
                     alt="UBTA Logo"
                     width={240}
                     height={240}
-                    className="rounded-full object-cover w-full h-full group-hover:scale-105 transition-transform duration-300"
+                    className="object-contain p-4 w-full h-full group-hover:scale-105 transition-transform duration-300"
                     priority
                   />
                 </div>
