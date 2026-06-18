@@ -382,7 +382,7 @@ export default function AboutPage() {
               <div className="flex items-center gap-4 pt-6 border-t border-gray-800">
                 <div className="w-14 h-14 rounded-full bg-[#0B0F19] border-2 border-[#F37121]/30 overflow-hidden flex items-center justify-center shrink-0">
                   {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src="/leadership/chairman.jpeg" alt="Hon. John Njeru"
+                  <img src="/chairman.jpeg" alt="Hon. John Njeru"
                     className="w-full h-full object-cover" />
                 </div>
                 <div>
@@ -488,12 +488,15 @@ export default function AboutPage() {
             {LEADERSHIP_TEAM.map((member, idx) => (
               <div key={idx}
                 className="bg-[#111827]/80 border border-gray-800/80 rounded-2xl overflow-hidden shadow-2xl flex flex-col">
-                <div className="relative w-full h-72 bg-gradient-to-b from-[#1F2937] to-[#111827] flex items-center justify-center overflow-hidden border-b border-gray-800">
-                  <div className="absolute inset-0 bg-cover bg-center mix-blend-luminosity opacity-40 hover:opacity-70 transition-all duration-300"
-                    style={{ backgroundImage: `url('${member.image}')` }} />
-                  <div className="absolute inset-0 bg-gradient-to-t from-[#111827] via-transparent to-transparent" />
-                  <Briefcase size={40} className="text-gray-700/50 relative z-0" />
-                </div>
+               <div className="relative w-full h-72 bg-[#1F2937] overflow-hidden border-b border-gray-800">
+  {/* eslint-disable-next-line @next/next/no-img-element */}
+  <img
+    src={member.image}
+    alt={member.name}
+    className="w-full h-full object-cover object-top transition-transform duration-500 group-hover:scale-105"
+  />
+  <div className="absolute inset-0 bg-gradient-to-t from-[#111827] via-transparent to-transparent pointer-events-none" />
+</div>
                 <div className="p-6 flex-grow flex flex-col justify-between">
                   <div>
                     <div className="flex items-center justify-between gap-2 mb-2">
