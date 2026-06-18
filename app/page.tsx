@@ -9,7 +9,7 @@ import { UBTA_CONFIG } from '../config';
 function WhatsAppButton() {
   return (
     <a
-      href="https://wa.me/254715050260?text=Hello%20UBTA%2C%20I%20would%20like%20to%20inquire%20about%20membership."
+      href="https://wa.me/254714314342?text=Hello%20UBTA%2C%20I%20would%20like%20to%20inquire%20about%20membership."
       target="_blank"
       rel="noopener noreferrer"
       className="fixed bottom-6 right-6 z-50 flex items-center gap-2 bg-[#25D366] hover:bg-[#1ebe5d] text-white font-bold px-4 py-3 rounded-full shadow-2xl shadow-[#25D366]/30 transition-all hover:scale-105 group"
