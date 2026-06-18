@@ -7,6 +7,10 @@ import "./globals.css";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
+  icons: {
+    icon: "/favicon.ico",
+    apple: "/apple-touch-icon.png",
+  },
   title: "UBTA - United Boda Transport Association | Nairobi Kenya",
   description: "CBD United Boda Transport Co-Operative Society Limited. Register your boda boda membership, get your certificate and join thousands of riders in Nairobi Kenya. Stronger Together. Safer Together. Growing Together.",
   keywords: "boda boda nairobi, ubta, united boda transport, boda registration kenya, boda sacco nairobi, CBD sacco, boda boda sacco kenya",
