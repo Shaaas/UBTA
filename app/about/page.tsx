@@ -88,6 +88,7 @@ const LEADERSHIP_TEAM = [
     responsibility:
       "Provides overall strategic leadership for UBTA, represents the association in government and county engagements, and ensures national level vision and policy direction are implemented.",
     image: "/chairman.jpeg",
+    focal: "object-top", // adjust per-photo: object-top | object-center | object-bottom | object-[50%_20%]
   },
   {
     name: "Samuel Ndegwa Mugo",
@@ -95,6 +96,7 @@ const LEADERSHIP_TEAM = [
     responsibility:
       "Supports the Chairman in leadership and coordination of UBTA operations, oversees internal systems including member registration and documentation processes, and assists in institutional relationships and compliance matters.",
     image: "/deputy.jpeg",
+    focal: "object-top",
   },
   {
     name: "Ruth Wangui Kariuki",
@@ -102,6 +104,7 @@ const LEADERSHIP_TEAM = [
     responsibility:
       "Manages UBTA administration including official communication, scheduling and coordination of meetings, preparation and safekeeping of official records, documentation of board decisions, and follow up on implementation of resolutions and organizational policies.",
     image: "/secretary.jpeg",
+    focal: "object-top",
   },
   {
     name: "Sharon Mutanu",
@@ -109,6 +112,7 @@ const LEADERSHIP_TEAM = [
     responsibility:
       "Leads external engagement and growth for UBTA including building partnerships with banks, SACCOs, fleet companies, and investors, developing funding and development opportunities, coordinating proposals, and managing stakeholder relationships.",
     image: "/head.jpeg",
+    focal: "object-top",
   },
   {
     name: "Joel Simiyu Wamasibili",
@@ -116,6 +120,7 @@ const LEADERSHIP_TEAM = [
     responsibility:
       "Oversight of UBTA financial management including member contributions, tracking of funds, budgeting support, financial reporting, and ensuring proper use and accountability of association resources.",
     image: "/treasurer.jpeg",
+    focal: "object-top",
   },
   
 ];
@@ -324,7 +329,7 @@ export default function AboutPage() {
               Our Plan
             </h2>
             <p className="text-gray-400 max-w-xl mx-auto text-sm font-medium leading-relaxed">
-              Eight clear commitments that drive everything UBTA does — from grassroots rider registration
+              Eight clear commitments that drive everything UBTA does; from grassroots rider registration
               to national-level advocacy and international investment partnerships.
             </p>
           </div>
@@ -357,7 +362,7 @@ export default function AboutPage() {
               </h2>
               <p className="text-gray-400 text-sm leading-relaxed mb-8">
                 UBTA is organizing and bringing together representatives from every corner of the
-                boda boda transport ecosystem — riders, SACCOs, investors, and community groups —
+                boda boda transport ecosystem. Riders, SACCOs, investors, and community groups, all
                 under one united national platform.
               </p>
               <div className="space-y-3">
@@ -476,7 +481,7 @@ export default function AboutPage() {
               Accountability-First Leadership
             </p>
             <h2 className="text-white font-black text-3xl lg:text-4xl uppercase tracking-tight mb-4">
-              Executive Council
+              BOARD OF DIRECTORS
             </h2>
             <p className="text-gray-400 max-w-xl mx-auto text-sm font-medium">
               The foundational leadership board driving operational integrity, policy compliance,
@@ -493,7 +498,7 @@ export default function AboutPage() {
   <img
     src={member.image}
     alt={member.name}
-    className="w-full h-full object-cover object-top transition-transform duration-500 group-hover:scale-105"
+    className={`w-full h-full object-cover ${member.focal} transition-transform duration-500 group-hover:scale-105`}
   />
   <div className="absolute inset-0 bg-gradient-to-t from-[#111827] via-transparent to-transparent pointer-events-none" />
 </div>
