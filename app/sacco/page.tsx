@@ -125,7 +125,7 @@ export default function SaccoPage() {
               <span className="text-teal-400">SACCO</span>
             </h1>
             <p className="text-gray-400 text-base sm:text-lg leading-relaxed max-w-2xl mb-8">
-              Your savings cooperative — built by riders, for riders. Save monthly,
+              Your savings cooperative; built by riders, for riders. Save monthly,
               build your credit record, and access loans up to <span className="text-white font-bold">3× your savings</span>.
               Financial freedom starts here.
             </p>
@@ -179,13 +179,13 @@ export default function SaccoPage() {
               </h2>
               <div className="space-y-4 text-gray-400 text-sm sm:text-base leading-relaxed">
                 <p>
-                  CBD United Boda Transport Co-Operative Society Limited — known as CBD SACCO —
+                  CBD United Boda Transport Co-Operative Society Limited, known as CBD SACCO, 
                   is the financial arm of UBTA. We exist to bring real financial inclusion to
                   boda boda and taxi operators across Nairobi and beyond.
                 </p>
                 <p>
                   Too many riders have been locked out of formal financial services. No bank
-                  account, no credit history, no loan access. CBD SACCO changes that — using
+                  account, no credit history, no loan access. CBD SACCO changes that! Using
                   the strength of collective savings to unlock credit for every active member.
                 </p>
                 <p>
@@ -276,7 +276,7 @@ export default function SaccoPage() {
                 </h3>
                 <p className="text-gray-400 text-xs sm:text-sm leading-relaxed">
                   The more consistently you save, the larger your loan eligibility grows.
-                  Discipline today — financial freedom tomorrow.
+                  Discipline today, financial freedom tomorrow.
                 </p>
               </div>
               <div className="grid grid-cols-3 gap-3 sm:gap-4 lg:col-span-3">
@@ -529,7 +529,7 @@ export default function SaccoPage() {
           </h2>
           <p className="text-gray-400 text-sm max-w-lg mx-auto mb-8 leading-relaxed">
             Join hundreds of riders already saving and growing with CBD SACCO.
-            Discipline today — financial freedom tomorrow.
+            Discipline today, financial freedom tomorrow.
           </p>
           <div className="flex flex-wrap gap-4 justify-center">
             <Link href="/auth/register" className="inline-flex items-center gap-2 bg-orange-500 hover:bg-orange-600 text-white font-bold text-sm px-6 py-3.5 rounded-xl transition-all shadow-lg shadow-orange-500/20">
