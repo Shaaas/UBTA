@@ -493,8 +493,7 @@ export default function AboutPage() {
             {LEADERSHIP_TEAM.map((member, idx) => (
               <div key={idx}
                 className="bg-[#111827]/80 border border-gray-800/80 rounded-2xl overflow-hidden shadow-2xl flex flex-col">
-               <div className="relative w-full h-72 bg-[#1F2937] overflow-hidden border-b border-gray-800">
-  {/* eslint-disable-next-line @next/next/no-img-element */}
+<div className="relative w-full aspect-[4/5] bg-[#1F2937] overflow-hidden border-b border-gray-800"><div className="relative w-full aspect-[4/5] bg-[#1F2937] overflow-hidden border-b border-gray-800">  {/* eslint-disable-next-line @next/next/no-img-element */}
   <img
     src={member.image}
     alt={member.name}
