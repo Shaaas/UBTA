@@ -13,7 +13,7 @@ export const metadata: Metadata = {
     "United Boda Transport Association — uniting, empowering, and representing all boda boda riders, transport SACCOs, and transport stakeholders across Kenya.",
 };
 
-// ─── Data ──────────────────────────────────────────────────────────────────────
+//  Data 
 
 const STATS = [
   { val: "500+",      lbl: "Registered Members" },
@@ -212,13 +212,13 @@ const MEMBERSHIP_OPTIONS = [
   },
 ];
 
-// ─── Page ──────────────────────────────────────────────────────────────────────
+//  Page 
 
 export default function AboutPage() {
   return (
     <div className="w-full bg-[#0B0F19] min-h-screen text-slate-200">
 
-      {/* ── HERO ──────────────────────────────────────────────── */}
+      {/*  HERO  */}
       <section
         className="relative overflow-hidden w-full py-24 lg:py-32 border-b border-gray-800/60 bg-cover bg-center"
         style={{ backgroundImage: "url('/aboutbackground.jpeg')" }}
@@ -259,7 +259,7 @@ export default function AboutPage() {
         </div>
       </section>
 
-      {/* ── STATS BAR ─────────────────────────────────────────── */}
+      {/*  STATS BAR  */}
       <section className="bg-[#F37121] border-b border-orange-600">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-6 text-center">
@@ -273,7 +273,7 @@ export default function AboutPage() {
         </div>
       </section>
 
-      {/* ── MISSION & VISION ──────────────────────────────────── */}
+      {/*  MISSION & VISION  */}
       <section className="py-20 lg:py-24 bg-[#0B0F19] border-b border-gray-800/40">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid md:grid-cols-2 gap-8">
@@ -320,7 +320,7 @@ export default function AboutPage() {
         </div>
       </section>
 
-      {/* ── OUR PLAN ──────────────────────────────────────────── */}
+      {/*  OUR PLAN  */}
       <section className="py-20 lg:py-24 bg-[#111827]/30 border-b border-gray-800/40">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-14">
@@ -350,7 +350,7 @@ export default function AboutPage() {
         </div>
       </section>
 
-      {/* ── REPRESENTATION ────────────────────────────────────── */}
+      {/*  REPRESENTATION  */}
       <section className="py-20 lg:py-24 bg-[#0B0F19] border-b border-gray-800/40">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid lg:grid-cols-2 gap-12 items-center">
@@ -402,7 +402,7 @@ export default function AboutPage() {
         </div>
       </section>
 
-      {/* ── TWO WAYS TO JOIN ──────────────────────────────────── */}
+      {/*  TWO WAYS TO JOIN  */}
       <section className="py-20 lg:py-24 bg-[#111827]/30 border-b border-gray-800/40">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-14">
@@ -473,7 +473,7 @@ export default function AboutPage() {
         </div>
       </section>
 
-      {/* ── LEADERSHIP ────────────────────────────────────────── */}
+      {/*  LEADERSHIP  */}
       <section className="py-20 lg:py-24 bg-[#0B0F19] border-b border-gray-800/40">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
@@ -493,7 +493,7 @@ export default function AboutPage() {
             {LEADERSHIP_TEAM.map((member, idx) => (
               <div key={idx}
                 className="bg-[#111827]/80 border border-gray-800/80 rounded-2xl overflow-hidden shadow-2xl flex flex-col">
-<div className="relative w-full aspect-[4/5] bg-[#1F2937] overflow-hidden border-b border-gray-800"><div className="relative w-full aspect-[4/5] bg-[#1F2937] overflow-hidden border-b border-gray-800">  {/* eslint-disable-next-line @next/next/no-img-element */}
+<div className="relative w-full aspect-[4/5] bg-[#1F2937] overflow-hidden border-b border-gray-800">  {/* eslint-disable-next-line @next/next/no-img-element */}
   <img
     src={member.image}
     alt={member.name}
@@ -519,7 +519,7 @@ export default function AboutPage() {
         </div>
       </section>
 
-      {/* ── FIVE PILLARS ──────────────────────────────────────── */}
+      {/*  FIVE PILLARS  */}
       <section className="py-20 lg:py-24 bg-[#111827]/30 border-b border-gray-800/60">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
@@ -550,7 +550,7 @@ export default function AboutPage() {
         </div>
       </section>
 
-      {/* ── OUR STORY ─────────────────────────────────────────── */}
+      {/*  OUR STORY  */}
       <section className="py-20 lg:py-24 bg-[#0B0F19] border-b border-gray-800/40">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid lg:grid-cols-12 gap-12 lg:gap-16 items-start">
@@ -611,7 +611,7 @@ export default function AboutPage() {
         </div>
       </section>
 
-      {/* ── BENEFITS ──────────────────────────────────────────── */}
+      {/*  BENEFITS  */}
       <section className="py-20 lg:py-24 bg-[#0B0F19] border-b border-gray-800/60">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-14">
@@ -682,7 +682,7 @@ export default function AboutPage() {
         </div>
       </section>
 
-      {/* ── AGENT LOCATIONS + CONTACT ─────────────────────────── */}
+      {/*  AGENT LOCATIONS + CONTACT  */}
       <section className="py-20 lg:py-24 bg-[#111827]/10 border-b border-gray-800/60">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid lg:grid-cols-2 gap-12 items-start">
@@ -745,7 +745,7 @@ export default function AboutPage() {
         </div>
       </section>
 
-      {/* ── FOOTER CTA ────────────────────────────────────────── */}
+      {/*  FOOTER CTA  */}
       <section className="py-20 lg:py-24 bg-[#F37121] text-center relative overflow-hidden">
         <div className="absolute inset-0 bg-black/5" />
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 z-10">
