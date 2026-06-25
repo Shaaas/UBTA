@@ -103,7 +103,7 @@ const LEADERSHIP_TEAM = [
  
   {
     name: "Joel Simiyu Wamasibili",
-    role: "National County Chairman",
+    role: "Nairobi County Chairman",
     image: "/treasurer.jpeg",
     focal: "object-top",
   },
