@@ -494,8 +494,6 @@ export default function AboutPage() {
                         <Award size={10} /> Verified
                       </span>
                     </div>
-                    <p className="text-[#F37121] text-xs font-black uppercase tracking-wider mb-4">{member.role}</p>
-                    <p className="text-gray-400 text-xs leading-relaxed font-medium">{member.responsibility}</p>
                   </div>
                 </div>
               </div>
@@ -529,7 +527,7 @@ export default function AboutPage() {
                   <h3 className="font-bold text-white text-base uppercase mb-3 tracking-wide">{pillar.title}</h3>
                   <p className="text-gray-400 text-xs leading-relaxed font-medium">{pillar.description}</p>
                 </div>
-              );
+              );className
             })}
           </div>
         </div>
