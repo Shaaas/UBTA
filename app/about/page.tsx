@@ -106,14 +106,7 @@ const LEADERSHIP_TEAM = [
     image: "/secretary.jpeg",
     focal: "object-top",
   },
-  {
-    name: "Sharon Mutanu",
-    role: "Head of Partnership and Development",
-    responsibility:
-      "Leads external engagement and growth for UBTA including building partnerships with banks, SACCOs, fleet companies, and investors, developing funding and development opportunities, coordinating proposals, and managing stakeholder relationships.",
-    image: "/head.jpeg",
-    focal: "object-top",
-  },
+ 
   {
     name: "Joel Simiyu Wamasibili",
     role: "Treasurer",
