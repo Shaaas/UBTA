@@ -527,6 +527,7 @@ export default function AboutPage() {
                   <h3 className="font-bold text-white text-base uppercase mb-3 tracking-wide">{pillar.title}</h3>
                   <p className="text-gray-400 text-xs leading-relaxed font-medium">{pillar.description}</p>
                 </div>
+              );
             })}
           </div>
         </div>
