@@ -494,6 +494,7 @@ export default function AboutPage() {
                         <Award size={10} /> Verified
                       </span>
                     </div>
+                    <p className="text-[#F37121] text-xs font-bold uppercase tracking-wide">{member.role}</p>
                   </div>
                 </div>
               </div>
