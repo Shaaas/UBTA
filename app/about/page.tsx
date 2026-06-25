@@ -85,33 +85,25 @@ const LEADERSHIP_TEAM = [
   {
     name: "Hon. John Njeru",
     role: "National Chairman",
-    responsibility:
-      "Provides overall strategic leadership for UBTA, represents the association in government and county engagements, and ensures national level vision and policy direction are implemented.",
     image: "/chairman.jpeg",
     focal: "object-top", // adjust per-photo: object-top | object-center | object-bottom | object-[50%_20%]
   },
   {
     name: "Samuel Ndegwa Mugo",
-    role: "Deputy Chairman",
-    responsibility:
-      "Supports the Chairman in leadership and coordination of UBTA operations, oversees internal systems including member registration and documentation processes, and assists in institutional relationships and compliance matters.",
+    role: "National Deputy Chairman",
     image: "/deputy.jpeg",
     focal: "object-top",
   },
   {
     name: "Ruth Wangui Kariuki",
-    role: "General Secretary",
-    responsibility:
-      "Manages UBTA administration including official communication, scheduling and coordination of meetings, preparation and safekeeping of official records, documentation of board decisions, and follow up on implementation of resolutions and organizational policies.",
+    role: "National Secretary",
     image: "/secretary.jpeg",
     focal: "object-top",
   },
  
   {
     name: "Joel Simiyu Wamasibili",
-    role: "Treasurer",
-    responsibility:
-      "Oversight of UBTA financial management including member contributions, tracking of funds, budgeting support, financial reporting, and ensuring proper use and accountability of association resources.",
+    role: "National County Chairman",
     image: "/treasurer.jpeg",
     focal: "object-top",
   },
