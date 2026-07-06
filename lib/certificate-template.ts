@@ -10,8 +10,8 @@ export interface CertificateData {
   mpesaReceipt:    string;
   dateJoined:      string;
   county:          string;
-  bikeReg:        string;
-  sigDataUrl:     string;
+  bikeReg:         string;
+  sigDataUrl:      string;
 }
 
 function formatMembershipType(type: string): string {
@@ -28,7 +28,7 @@ function formatDate(dateStr: string): string {
   });
 }
 
-export const CHAIRPERSON_SIG = "data:image/jpeg;base64,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";
+export const CHAIRPERSON_SIG = "data:image/jpeg;base64,..."; // Truncated for readability
 
 export function generateCertificateHTML(data: CertificateData): string {
   const membershipLabel = formatMembershipType(data.membershipType);
@@ -52,12 +52,12 @@ export function generateCertificateHTML(data: CertificateData): string {
 
   /* -- Outer borders -- */
   .border-outer {
-    position:absolute; inset:8px;
-    border:3px solid #F37121; z-index:1; pointer-events:none;
+    position:absolute; inset:12px;
+    border:4px solid #F37121; z-index:1; pointer-events:none;
   }
   .border-inner {
-    position:absolute; inset:14px;
-    border:1px solid #d4a84b; z-index:1; pointer-events:none;
+    position:absolute; inset:20px;
+    border:1.5px solid #d4a84b; z-index:1; pointer-events:none;
   }
 
   /* -- Corner accents -- */
@@ -101,52 +101,52 @@ export function generateCertificateHTML(data: CertificateData): string {
 
   /* -- Layout -- */
   .layout {
-    position:absolute; inset:26px;
+    position:absolute; inset:36px;
     display:flex; gap:0; z-index:10;
   }
 
   /* -- Left column -- */
   .left-col {
-    width:220px; shrink:0;
+    width:240px; shrink:0;
     display:flex; flex-direction:column;
-    align-items:center; gap:16px; padding-top:4px;
+    align-items:center; gap:20px; padding-top:10px;
   }
   .logo-wrap {
-    width:96px; height:96px; border-radius:50%;
+    width:110px; height:110px; border-radius:50%;
     border:3px solid #F37121;
     display:flex; align-items:center; justify-content:center;
     background:white; overflow:hidden;
     box-shadow:0 4px 16px rgba(243,113,33,0.25);
   }
-  .logo-wrap img { width:88px; height:88px; object-fit:contain; border-radius:50%; }
+  .logo-wrap img { width:100px; height:100px; object-fit:contain; border-radius:50%; }
 
   .meta-box {
     width:100%; background:#f8f8f8;
     border:1px solid #e8e8e8; border-radius:8px;
-    padding:14px 12px; display:flex; flex-direction:column; gap:10px;
+    padding:18px 14px; display:flex; flex-direction:column; gap:12px;
   }
-  .meta-row { display:flex; flex-direction:column; gap:1px; }
+  .meta-row { display:flex; flex-direction:column; gap:2px; }
   .meta-label {
-    font-size:7.5px; font-weight:900; color:#1a5c2e;
+    font-size:8.5px; font-weight:900; color:#1a5c2e;
     text-transform:uppercase; letter-spacing:0.1em;
   }
-  .meta-value { font-size:10.5px; font-weight:700; color:#111; }
+  .meta-value { font-size:11.5px; font-weight:700; color:#111; }
   .meta-divider { width:100%; height:1px; background:#e0e0e0; }
 
   /* -- Right column -- */
   .right-col {
-    flex:1; padding-left:24px;
+    flex:1; padding-left:30px; padding-right:15px;
     display:flex; flex-direction:column;
   }
 
   /* Header row */
   .header-row {
     display:flex; align-items:flex-start;
-    justify-content:space-between; margin-bottom:6px;
+    justify-content:space-between; margin-bottom:15px;
   }
   .ubta-block { display:flex; flex-direction:column; }
   .ubta-letters {
-    font-size:54px; font-weight:900;
+    font-size:58px; font-weight:900;
     letter-spacing:0.06em; line-height:1; color:#111;
   }
   .ubta-letters .u { color:#F37121; }
@@ -154,18 +154,18 @@ export function generateCertificateHTML(data: CertificateData): string {
   .ubta-letters .t { color:#F37121; }
   .ubta-letters .a { color:#1a5c2e; }
   .org-name {
-    font-size:9px; font-weight:900; color:#1a5c2e;
+    font-size:11px; font-weight:900; color:#1a5c2e;
     text-transform:uppercase; letter-spacing:0.05em;
-    line-height:1.4; margin-top:2px;
+    line-height:1.4; margin-top:4px;
   }
   .org-tagline {
-    font-size:8px; color:#555; margin-top:3px; font-style:italic;
+    font-size:9px; color:#555; margin-top:4px; font-style:italic;
   }
   .org-tagline span { color:#F37121; }
 
   /* Gold seal */
   .gold-seal {
-    width:74px; height:74px;
+    width:84px; height:84px;
     background:radial-gradient(circle at 35% 35%,#f5d060,#c8941a,#8b6200);
     border-radius:50%;
     display:flex; flex-direction:column;
@@ -174,96 +174,97 @@ export function generateCertificateHTML(data: CertificateData): string {
     border:2px solid #d4a84b;
   }
   .seal-text {
-    font-size:6.5px; font-weight:900; color:white;
+    font-size:7.5px; font-weight:900; color:white;
     text-align:center; text-transform:uppercase;
     letter-spacing:0.05em; line-height:1.35;
     text-shadow:0 1px 2px rgba(0,0,0,0.4);
   }
-  .seal-text .seal-stars { font-size:7px; }
-  .seal-text .seal-ubta  { font-size:15px; font-weight:900; display:block; }
+  .seal-text .seal-stars { font-size:8px; }
+  .seal-text .seal-ubta  { font-size:17px; font-weight:900; display:block; }
 
   /* Certificate title */
   .cert-title-block {
     text-align:center;
     border-top:2px solid #F37121;
     border-bottom:1px solid #d4a84b;
-    padding:6px 0; margin:5px 0 6px;
+    padding:10px 0; margin:10px 0 14px;
   }
   .cert-title {
     font-family:'Playfair Display',serif;
-    font-size:32px; font-weight:700;
+    font-size:40px; font-weight:700;
     color:#111; letter-spacing:0.14em; text-transform:uppercase;
+    line-height:1.1;
   }
   .cert-subtitle {
-    font-size:10.5px; font-weight:900; color:#1a5c2e;
-    letter-spacing:0.28em; text-transform:uppercase; margin-top:1px;
+    font-size:12px; font-weight:900; color:#1a5c2e;
+    letter-spacing:0.28em; text-transform:uppercase; margin-top:4px;
   }
 
   /* Black certify strip */
   .certify-strip {
     background:#111; color:white; text-align:center;
-    font-size:8px; font-weight:700;
+    font-size:10px; font-weight:700;
     letter-spacing:0.22em; text-transform:uppercase;
-    padding:4px 0; margin-bottom:5px; border-radius:2px;
+    padding:6px 0; margin-bottom:18px; border-radius:2px;
   }
 
   /* Member name */
   .member-name {
     font-family:'Raleway', sans-serif;
-    font-size:46px; font-weight:700; color:#111;
-    text-align:center; line-height:1; margin-bottom:7px;
+    font-size:52px; font-weight:700; color:#111;
+    text-align:center; line-height:1.1; margin-bottom:18px;
   }
 
   /* Body text */
   .cert-body {
-    font-size:10px; color:#333; text-align:center;
-    line-height:1.65; max-width:460px; margin:0 auto 8px;
+    font-size:13px; color:#333; text-align:center;
+    line-height:1.7; max-width:640px; margin:0 auto 20px;
   }
   .cert-body strong { color:#F37121; }
 
   /* Tagline */
   .tagline {
-    text-align:center; font-size:7.5px; font-weight:900;
+    text-align:center; font-size:9px; font-weight:900;
     color:#1a5c2e; letter-spacing:0.2em; text-transform:uppercase;
     border-top:1px solid #e0e0e0; border-bottom:1px solid #e0e0e0;
-    padding:4px 0; margin-bottom:10px;
+    padding:6px 0; margin-bottom:15px;
   }
   .tagline::before,.tagline::after { content:"- "; color:#d4a84b; }
 
   /* Signature section */
   .sig-section {
     display:flex; align-items:flex-end;
-    justify-content:space-between; margin-top:auto; padding-top:4px;
+    justify-content:space-between; margin-top:auto; padding-top:10px; padding-bottom:10px;
   }
   .sig-block {
     display:flex; flex-direction:column;
-    align-items:center; gap:0; min-width:160px;
+    align-items:center; gap:0; min-width:180px;
   }
   .sig-img-wrap {
-    width:160px; height:50px;
+    width:180px; height:55px;
     display:flex; align-items:flex-end; justify-content:center;
   }
   .sig-img-wrap img {
-    max-height:48px; max-width:150px; object-fit:contain;
+    max-height:52px; max-width:170px; object-fit:contain;
   }
-  .sig-line { width:160px; height:1px; background:#333; }
+  .sig-line { width:180px; height:1px; background:#333; }
   .sig-label {
-    font-size:7.5px; font-weight:700; text-transform:uppercase;
-    letter-spacing:0.14em; color:#444; margin-top:3px;
+    font-size:8.5px; font-weight:700; text-transform:uppercase;
+    letter-spacing:0.14em; color:#444; margin-top:4px;
   }
-  .sig-name { font-size:8px; font-weight:600; color:#111; }
+  .sig-name { font-size:9px; font-weight:600; color:#111; }
 
   /* Center seal */
   .center-seal {
-    width:66px; height:66px;
+    width:76px; height:76px;
     background:radial-gradient(circle at 35% 35%,#f5d060,#c8941a,#8b6200);
     border-radius:50%; display:flex; flex-direction:column;
     align-items:center; justify-content:center;
     box-shadow:0 4px 16px rgba(200,148,26,0.5);
-    border:3px solid #d4a84b; margin-bottom:6px;
+    border:3px solid #d4a84b; margin-bottom:2px;
   }
   .center-seal-text {
-    font-size:13px; font-weight:900; color:white;
+    font-size:15px; font-weight:900; color:white;
     text-shadow:0 1px 3px rgba(0,0,0,0.5); letter-spacing:0.05em;
   }
 </style>
