@@ -927,7 +927,7 @@ export default function AdminDashboard() {
           </button>
         </div>
 
-        {/* Members table */}
+        {activeTab !== "gallery" && (
         <div className="bg-[#111827] border border-gray-800 rounded-2xl overflow-hidden">
 
           {/* Table header */}
@@ -1061,13 +1061,13 @@ export default function AdminDashboard() {
             </div>
           )}
         </div>
+      )}
       </div>
       {activeTab === "gallery" && (
-          <div className="p-6">
-            <GalleryTab />
-          </div>
-        )}
-
+        <div className="p-6">
+          <GalleryTab />
+        </div>
+      )}
       {/* Modals */}
       {viewMember && (
         <MemberModal
