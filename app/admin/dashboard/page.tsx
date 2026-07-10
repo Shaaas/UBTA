@@ -1105,12 +1105,12 @@ export default function AdminDashboard() {
   );
 }
 function GalleryTab() {
-  const [title, setTitle] = useState("");
   const [category, setCategory] = useState("Community");
   const [date, setDate] = useState("");
   const [location, setLocation] = useState("");
-  const [file, setFile] = useState<File | null>(null);
+  const [files, setFiles] = useState<File[]>([]);
   const [loading, setLoading] = useState(false);
+  const [progress, setProgress] = useState<string>("");
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [items, setItems] = useState<any[]>([]);
@@ -1119,42 +1119,81 @@ function GalleryTab() {
     fetch("/api/admin/gallery").then(r => r.json()).then(d => setItems(d.items ?? []));
   }, [success]);
 
+  // Compress image before upload to save memory on mobile
+  const compressImage = (file: File, maxWidth = 1200): Promise<Blob> => {
+    return new Promise((resolve) => {
+      const img = new Image();
+      const url = URL.createObjectURL(file);
+      img.onload = () => {
+        URL.revokeObjectURL(url);
+        const scale = Math.min(1, maxWidth / img.width);
+        const canvas = document.createElement("canvas");
+        canvas.width = img.width * scale;
+        canvas.height = img.height * scale;
+        const ctx = canvas.getContext("2d")!;
+        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+        canvas.toBlob((blob) => resolve(blob!), "image/jpeg", 0.8);
+      };
+      img.src = url;
+    });
+  };
+
   const handleUpload = async () => {
-    if (!file || !title || !date || !location) {
-      setError("All fields required"); return;
+    if (!files.length || !date || !location) {
+      setError("Please select photos and fill in date and location"); return;
     }
     setLoading(true); setError(null);
-    const fd = new FormData();
-    fd.append("file", file);
-    fd.append("title", title);
-    fd.append("category", category);
-    fd.append("date", date);
-    fd.append("location", location);
-    const res = await fetch("/api/admin/gallery", { method: "POST", body: fd });
-    const data = await res.json();
-    if (!res.ok) setError(data.error);
-    else { setSuccess(true); setTitle(""); setDate(""); setLocation(""); setFile(null); setTimeout(() => setSuccess(false), 3000); }
+
+    let uploaded = 0;
+    for (const file of files) {
+      setProgress(`Uploading ${uploaded + 1} of ${files.length}...`);
+      try {
+        const compressed = await compressImage(file);
+        const title = file.name.replace(/\.[^/.]+$/, "").replace(/[-_]/g, " ");
+        const fd = new FormData();
+        fd.append("file", compressed, file.name);
+        fd.append("title", title);
+        fd.append("category", category);
+        fd.append("date", date);
+        fd.append("location", location);
+        const res = await fetch("/api/admin/gallery", { method: "POST", body: fd });
+        if (!res.ok) {
+          const d = await res.json();
+          setError(`Failed on ${file.name}: ${d.error}`);
+          break;
+        }
+        uploaded++;
+      } catch (e) {
+        setError(`Error processing ${file.name}`);
+        break;
+      }
+    }
+
+    if (uploaded === files.length) {
+      setSuccess(true);
+      setFiles([]);
+      setDate("");
+      setLocation("");
+      setProgress("");
+      setTimeout(() => setSuccess(false), 3000);
+    }
     setLoading(false);
+    setProgress("");
   };
 
   const handleDelete = async (id: string) => {
     if (!confirm("Delete this photo?")) return;
     await fetch("/api/admin/gallery", { method: "DELETE", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ id }) });
-    setItems(prev => prev.filter(i => i.id !== id));
+    setItems(prev => prev.filter((i: any) => i.id !== id));
   };
 
   return (
     <div className="space-y-8">
       <div className="bg-[#111827] border border-gray-800 rounded-2xl p-6">
-        <h3 className="font-black text-white text-lg uppercase tracking-tight mb-6">Upload Photo</h3>
+        <h3 className="font-black text-white text-lg uppercase tracking-tight mb-6">Upload Photos</h3>
         {error && <div className="bg-red-500/10 border border-red-500/30 text-red-400 text-xs rounded-xl px-4 py-3 mb-4">{error}</div>}
-        {success && <div className="bg-green-500/10 border border-green-500/30 text-green-400 text-xs rounded-xl px-4 py-3 mb-4">Photo uploaded successfully!</div>}
+        {success && <div className="bg-green-500/10 border border-green-500/30 text-green-400 text-xs rounded-xl px-4 py-3 mb-4">Photos uploaded successfully!</div>}
         <div className="grid sm:grid-cols-2 gap-4">
-          <div>
-            <label className="block text-[11px] font-bold text-gray-500 uppercase tracking-widest mb-2">Title</label>
-            <input value={title} onChange={e => setTitle(e.target.value)} placeholder="e.g. Safety Training Day"
-              className="w-full bg-[#0B0F19] border border-gray-800 rounded-xl px-4 py-3 text-white text-sm focus:outline-none focus:border-orange-500/60" />
-          </div>
           <div>
             <label className="block text-[11px] font-bold text-gray-500 uppercase tracking-widest mb-2">Category</label>
             <select value={category} onChange={e => setCategory(e.target.value)}
@@ -1169,20 +1208,28 @@ function GalleryTab() {
             <input value={date} onChange={e => setDate(e.target.value)} placeholder="e.g. July 2026"
               className="w-full bg-[#0B0F19] border border-gray-800 rounded-xl px-4 py-3 text-white text-sm focus:outline-none focus:border-orange-500/60" />
           </div>
-          <div>
+          <div className="sm:col-span-2">
             <label className="block text-[11px] font-bold text-gray-500 uppercase tracking-widest mb-2">Location</label>
             <input value={location} onChange={e => setLocation(e.target.value)} placeholder="e.g. Githurai Hub"
               className="w-full bg-[#0B0F19] border border-gray-800 rounded-xl px-4 py-3 text-white text-sm focus:outline-none focus:border-orange-500/60" />
           </div>
           <div className="sm:col-span-2">
-            <label className="block text-[11px] font-bold text-gray-500 uppercase tracking-widest mb-2">Photo</label>
-            <input type="file" accept="image/*" onChange={e => setFile(e.target.files?.[0] ?? null)}
+            <label className="block text-[11px] font-bold text-gray-500 uppercase tracking-widest mb-2">
+              Photos — select multiple
+            </label>
+            <input type="file" accept="image/*" multiple
+              onChange={e => setFiles(Array.from(e.target.files ?? []))}
               className="w-full bg-[#0B0F19] border border-gray-800 rounded-xl px-4 py-3 text-white text-sm focus:outline-none focus:border-orange-500/60" />
+            {files.length > 0 && (
+              <p className="text-gray-500 text-xs mt-2">{files.length} photo{files.length > 1 ? "s" : ""} selected</p>
+            )}
           </div>
         </div>
         <button onClick={handleUpload} disabled={loading}
           className="mt-6 w-full bg-[#F37121] hover:bg-[#d65f17] disabled:opacity-50 text-white font-bold uppercase tracking-wide py-3.5 rounded-xl transition-all flex items-center justify-center gap-2 text-sm">
-          {loading ? <><span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" /> Uploading...</> : "Upload Photo"}
+          {loading
+            ? <><span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" /> {progress || "Uploading..."}</>
+            : `Upload ${files.length > 1 ? files.length + " Photos" : "Photo"}`}
         </button>
       </div>
 
