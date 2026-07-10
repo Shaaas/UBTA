@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import {
-  Users, Search, LogOut, Edit2, X, Check,
+  Users, Search, LogOut, Edit2, X, Check, Camera,
   ChevronLeft, ChevronRight, Phone, CreditCard,
   MapPin, Bike, Calendar, User, Shield,
   TrendingUp, RefreshCw, Eye, AlertCircle,
@@ -770,7 +770,7 @@ function ReissueModal({ member, onClose, onDone }: {
 
 export default function AdminDashboard() {
   const [admin,           setAdmin]           = useState<AdminInfo | null>(null);
-  const [activeTab,       setActiveTab]       = useState<"pending" | "verified">("pending");
+  const [activeTab,       setActiveTab]       = useState<"pending" | "verified" | "gallery">("pending");
   const [members,         setMembers]         = useState<Member[]>([]);
   const [pendingMembers,  setPendingMembers]  = useState<Member[]>([]);
   const [total,           setTotal]           = useState(0);
@@ -921,6 +921,10 @@ export default function AdminDashboard() {
                 : "text-gray-500 hover:text-gray-300"}`}>
             <CheckCircle size={13} /> Verified Members
           </button>
+          <button onClick={() => setActiveTab("gallery")}
+            className={`flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-bold uppercase tracking-wide transition-all ${activeTab === "gallery" ? "bg-orange-500/20 text-orange-400 border border-orange-500/30" : "text-gray-500 hover:text-gray-300"}`}>
+            <Camera size={13} /> Gallery
+          </button>
         </div>
 
         {/* Members table */}
@@ -1058,6 +1062,11 @@ export default function AdminDashboard() {
           )}
         </div>
       </div>
+      {activeTab === "gallery" && (
+          <div className="p-6">
+            <GalleryTab />
+          </div>
+        )}
 
       {/* Modals */}
       {viewMember && (
@@ -1092,6 +1101,107 @@ export default function AdminDashboard() {
           onDone={handleReissueDone}
         />
       )}
+    </div>
+  );
+}
+function GalleryTab() {
+  const [title, setTitle] = useState("");
+  const [category, setCategory] = useState("Community");
+  const [date, setDate] = useState("");
+  const [location, setLocation] = useState("");
+  const [file, setFile] = useState<File | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [success, setSuccess] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [items, setItems] = useState<any[]>([]);
+
+  useEffect(() => {
+    fetch("/api/admin/gallery").then(r => r.json()).then(d => setItems(d.items ?? []));
+  }, [success]);
+
+  const handleUpload = async () => {
+    if (!file || !title || !date || !location) {
+      setError("All fields required"); return;
+    }
+    setLoading(true); setError(null);
+    const fd = new FormData();
+    fd.append("file", file);
+    fd.append("title", title);
+    fd.append("category", category);
+    fd.append("date", date);
+    fd.append("location", location);
+    const res = await fetch("/api/admin/gallery", { method: "POST", body: fd });
+    const data = await res.json();
+    if (!res.ok) setError(data.error);
+    else { setSuccess(true); setTitle(""); setDate(""); setLocation(""); setFile(null); setTimeout(() => setSuccess(false), 3000); }
+    setLoading(false);
+  };
+
+  const handleDelete = async (id: string) => {
+    if (!confirm("Delete this photo?")) return;
+    await fetch("/api/admin/gallery", { method: "DELETE", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ id }) });
+    setItems(prev => prev.filter(i => i.id !== id));
+  };
+
+  return (
+    <div className="space-y-8">
+      <div className="bg-[#111827] border border-gray-800 rounded-2xl p-6">
+        <h3 className="font-black text-white text-lg uppercase tracking-tight mb-6">Upload Photo</h3>
+        {error && <div className="bg-red-500/10 border border-red-500/30 text-red-400 text-xs rounded-xl px-4 py-3 mb-4">{error}</div>}
+        {success && <div className="bg-green-500/10 border border-green-500/30 text-green-400 text-xs rounded-xl px-4 py-3 mb-4">Photo uploaded successfully!</div>}
+        <div className="grid sm:grid-cols-2 gap-4">
+          <div>
+            <label className="block text-[11px] font-bold text-gray-500 uppercase tracking-widest mb-2">Title</label>
+            <input value={title} onChange={e => setTitle(e.target.value)} placeholder="e.g. Safety Training Day"
+              className="w-full bg-[#0B0F19] border border-gray-800 rounded-xl px-4 py-3 text-white text-sm focus:outline-none focus:border-orange-500/60" />
+          </div>
+          <div>
+            <label className="block text-[11px] font-bold text-gray-500 uppercase tracking-widest mb-2">Category</label>
+            <select value={category} onChange={e => setCategory(e.target.value)}
+              className="w-full bg-[#0B0F19] border border-gray-800 rounded-xl px-4 py-3 text-white text-sm focus:outline-none focus:border-orange-500/60">
+              {["Community", "Rider Training", "SACCO Meetings", "Infrastructure"].map(c => (
+                <option key={c} value={c}>{c}</option>
+              ))}
+            </select>
+          </div>
+          <div>
+            <label className="block text-[11px] font-bold text-gray-500 uppercase tracking-widest mb-2">Date</label>
+            <input value={date} onChange={e => setDate(e.target.value)} placeholder="e.g. July 2026"
+              className="w-full bg-[#0B0F19] border border-gray-800 rounded-xl px-4 py-3 text-white text-sm focus:outline-none focus:border-orange-500/60" />
+          </div>
+          <div>
+            <label className="block text-[11px] font-bold text-gray-500 uppercase tracking-widest mb-2">Location</label>
+            <input value={location} onChange={e => setLocation(e.target.value)} placeholder="e.g. Githurai Hub"
+              className="w-full bg-[#0B0F19] border border-gray-800 rounded-xl px-4 py-3 text-white text-sm focus:outline-none focus:border-orange-500/60" />
+          </div>
+          <div className="sm:col-span-2">
+            <label className="block text-[11px] font-bold text-gray-500 uppercase tracking-widest mb-2">Photo</label>
+            <input type="file" accept="image/*" onChange={e => setFile(e.target.files?.[0] ?? null)}
+              className="w-full bg-[#0B0F19] border border-gray-800 rounded-xl px-4 py-3 text-white text-sm focus:outline-none focus:border-orange-500/60" />
+          </div>
+        </div>
+        <button onClick={handleUpload} disabled={loading}
+          className="mt-6 w-full bg-[#F37121] hover:bg-[#d65f17] disabled:opacity-50 text-white font-bold uppercase tracking-wide py-3.5 rounded-xl transition-all flex items-center justify-center gap-2 text-sm">
+          {loading ? <><span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" /> Uploading...</> : "Upload Photo"}
+        </button>
+      </div>
+
+      <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        {items.map((item: any) => (
+          <div key={item.id} className="bg-[#111827] border border-gray-800 rounded-xl overflow-hidden">
+            <div className="h-40 bg-cover bg-center" style={{ backgroundImage: `url('${item.image_url}')` }} />
+            <div className="p-4">
+              <p className="text-white font-bold text-sm">{item.title}</p>
+              <p className="text-gray-500 text-xs mt-1">{item.category} · {item.date}</p>
+              <p className="text-gray-600 text-xs">{item.location}</p>
+              <button onClick={() => handleDelete(item.id)}
+                className="mt-3 w-full text-red-400 hover:text-red-300 text-xs font-bold border border-red-500/20 hover:border-red-500/40 rounded-lg py-1.5 transition-all">
+                Delete
+              </button>
+            </div>
+          </div>
+        ))}
+      </div>
     </div>
   );
 }
