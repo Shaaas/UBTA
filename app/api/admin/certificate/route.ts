@@ -53,6 +53,35 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "memberId required" }, { status: 400 });
     }
 
+    // Demo mode — generate certificate with fake data
+    if (process.env.DEMO_MODE === "true") {
+      const { DEMO_MEMBERS } = await import("../../../../lib/demo-data");
+      const member = DEMO_MEMBERS.find(m => m.id === memberId) ?? DEMO_MEMBERS[0];
+      const certData = {
+        memberNumber: member.member_number,
+        fullName: member.full_name,
+        phoneNumber: member.phone_number,
+        idNumber: member.id_number,
+        membershipType: "member_registration_paid",
+        mpesaReceipt: "RCX1234567",
+        dateJoined: member.created_at,
+        county: member.working_county,
+        bikeReg: member.bike_registration_number,
+        sigDataUrl: "https://www.ubta.co.ke/chairperson.jpeg",
+      };
+      const { generateCertificateHTML } = await import("../../../../lib/certificate-template");
+      const html = generateCertificateHTML(certData);
+      return NextResponse.json({
+        success: true,
+        certificateUrl: "#demo",
+        whatsappLink: "#demo",
+        memberName: member.full_name,
+        memberNumber: member.member_number,
+        demoHtml: html,
+      });
+    }
+    }
+
     // ── 1. Fetch member ───────────────────────────────────────────────────────
     const { data: member, error: memberError } = await supabase
       .from("profiles")
