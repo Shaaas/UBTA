@@ -29,6 +29,15 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
+  // Demo mode — return fake data
+  if (process.env.DEMO_MODE === "true") {
+    const { DEMO_MEMBERS } = await import("../../../../lib/demo-data");
+    const { searchParams } = new URL(req.url);
+    const status = searchParams.get("status") ?? "verified";
+    const filtered = DEMO_MEMBERS.filter(m => m.status === status);
+    return NextResponse.json({ members: filtered, total: filtered.length, page: 1, limit: 20 });
+  }
+
   const { searchParams } = new URL(req.url);
   const search = searchParams.get("search") ?? "";
   const page   = parseInt(searchParams.get("page") ?? "1");

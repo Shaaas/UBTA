@@ -12,6 +12,20 @@ const JWT_SECRET = new TextEncoder().encode(
 );
 
 export async function POST(req: NextRequest) {
+  // Demo mode login
+  if (process.env.DEMO_MODE === "true") {
+    const { email, password } = await req.json();
+    if (email === "demo@ubta.co.ke" && password === "demo1234") {
+      const token = await new SignJWT({ id: "demo", role: "chairman", name: "Demo Admin" })
+        .setProtectedHeader({ alg: "HS256" })
+        .setExpirationTime("8h")
+        .sign(JWT_SECRET);
+      const res = NextResponse.json({ success: true, name: "Demo Admin", role: "chairman" });
+      res.cookies.set("ubta_admin_token", token, { httpOnly: true, maxAge: 60 * 60 * 8 });
+      return res;
+    }
+    return NextResponse.json({ error: "Invalid demo credentials" }, { status: 401 });
+  }
   try {
     const { email, password } = await req.json();
 
