@@ -80,7 +80,6 @@ export async function POST(req: NextRequest) {
         demoHtml: html,
       });
     }
-    }
 
     // ── 1. Fetch member ───────────────────────────────────────────────────────
     const { data: member, error: memberError } = await supabase
